@@ -1,0 +1,169 @@
+PCBNEW-LibModule-V1  lun 18 ene 2016 17:04:36 CET
+# encoding utf-8
+Units mm
+$INDEX
+ESP8266-ESP-12E
+$EndINDEX
+$MODULE ESP8266-ESP-12E
+Po 0 0 0 15 569D0D02 00000000 ~~
+Li ESP8266-ESP-12E
+Cd ESP8266 ESP-03 wifi module -- Phillip Pearson
+Sc 0
+AR /5613A2C5
+Op 0 0 0
+T0 -1.7 -1.8 1 1 900 0.15 N V 21 N "U9"
+T1 2.2 -0.1 1 1 900 0.15 N V 21 N "ESP866_ESP-12E"
+DS -6.1595 -14.097 9.8425 -14.097 0.15 21
+DS 9.8425 -14.097 9.8425 9.906 0.15 21
+DS 9.8425 9.906 9.398 9.906 0.15 21
+DS -6.1595 9.906 -6.1595 -14.097 0.15 21
+DS 9.398 9.906 -6.1595 9.906 0.15 21
+$PAD
+Sh "7" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -6.6635 5.8365
+$EndPAD
+$PAD
+Sh "6" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -6.6 3.9
+$EndPAD
+$PAD
+Sh "5" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -6.6 1.9
+$EndPAD
+$PAD
+Sh "4" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -6.6 -0.1
+$EndPAD
+$PAD
+Sh "3" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -6.6 -2.1
+$EndPAD
+$PAD
+Sh "2" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -6.6 -4.1
+$EndPAD
+$PAD
+Sh "1" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -6.6 -6.1
+$EndPAD
+$PAD
+Sh "1" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 6 "/GND"
+Po 6.6 5.9
+$EndPAD
+$PAD
+Sh "2" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 6.6 3.9
+$EndPAD
+$PAD
+Sh "3" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 5 "/ESP_TX"
+Po 6.6 1.9
+$EndPAD
+$PAD
+Sh "4" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 4 "/ESP_RX"
+Po 6.6 -0.1
+$EndPAD
+$PAD
+Sh "5" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 7 "/RESET"
+Po 6.6 -2.1
+$EndPAD
+$PAD
+Sh "6" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 8 "N-0000011"
+Po 6.6 -4.1
+$EndPAD
+$PAD
+Sh "7" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 6.6 -6.1
+$EndPAD
+$PAD
+Sh "8" R 2 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -6.6675 7.874
+$EndPAD
+$PAD
+Sh "9" R 2 1 0 0 900
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -3.175 10.287
+$EndPAD
+$PAD
+Sh "10" R 2 1 0 0 900
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -1.143 10.287
+$EndPAD
+$PAD
+Sh "11" R 2 1 0 0 900
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 0.889 10.287
+$EndPAD
+$PAD
+Sh "12" R 2 1 0 0 900
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 2.921 10.287
+$EndPAD
+$PAD
+Sh "13" R 2 1 0 0 900
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 4.953 10.287
+$EndPAD
+$PAD
+Sh "14" R 2 1 0 0 900
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 6.985 10.287
+$EndPAD
+$EndMODULE ESP8266-ESP-12E
+$EndLIBRARY

@@ -1,0 +1,403 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:special
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:relay
+LIBS:esp866_esp-12
+LIBS:transfo
+EELAYER 27 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date "18 jan 2016"
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L RZ03-1C4-D005 RL1
+U 1 1 569CD021
+P 5200 1700
+F 0 "RL1" H 5200 1300 60  0000 C CNN
+F 1 "RZ03-1C4-D005" H 5200 2100 60  0000 C CNN
+F 2 "~" H 5200 2100 60  0000 C CNN
+F 3 "~" H 5200 2100 60  0000 C CNN
+	1    5200 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L ESP866_ESP-12E U2
+U 1 1 569CDF5C
+P 2450 3100
+F 0 "U2" H 2950 2600 60  0000 C CNN
+F 1 "ESP866_ESP-12E" H 2450 3750 60  0000 C CNN
+F 2 "~" H 2300 2800 60  0000 C CNN
+F 3 "~" H 2300 2800 60  0000 C CNN
+	1    2450 3100
+	1    0    0    -1  
+$EndComp
+$Comp
+L TRANSFO T1
+U 1 1 569CE00E
+P 1900 1650
+F 0 "T1" H 1900 1900 70  0000 C CNN
+F 1 "220 VAC 5 VDC" H 1900 1350 70  0000 C CNN
+F 2 "~" H 1900 1650 60  0000 C CNN
+F 3 "~" H 1900 1650 60  0000 C CNN
+	1    1900 1650
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_2 P1
+U 1 1 569CE2FA
+P 850 1650
+F 0 "P1" V 800 1650 40  0000 C CNN
+F 1 "CONN_2" V 900 1650 40  0000 C CNN
+F 2 "" H 850 1650 60  0000 C CNN
+F 3 "" H 850 1650 60  0000 C CNN
+	1    850  1650
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R2
+U 1 1 569CE394
+P 4050 3000
+F 0 "R2" V 4130 3000 40  0000 C CNN
+F 1 "10K" V 4057 3001 40  0000 C CNN
+F 2 "~" V 3980 3000 30  0000 C CNN
+F 3 "~" H 4050 3000 30  0000 C CNN
+	1    4050 3000
+	0    1    1    0   
+$EndComp
+$Comp
+L R R3
+U 1 1 569CE3A3
+P 4050 3150
+F 0 "R3" V 4130 3150 40  0000 C CNN
+F 1 "10K" V 4057 3151 40  0000 C CNN
+F 2 "~" V 3980 3150 30  0000 C CNN
+F 3 "~" H 4050 3150 30  0000 C CNN
+	1    4050 3150
+	0    1    1    0   
+$EndComp
+$Comp
+L R R4
+U 1 1 569CE3B2
+P 4050 3300
+F 0 "R4" V 4130 3300 40  0000 C CNN
+F 1 "10K" V 4057 3301 40  0000 C CNN
+F 2 "~" V 3980 3300 30  0000 C CNN
+F 3 "~" H 4050 3300 30  0000 C CNN
+	1    4050 3300
+	0    1    1    0   
+$EndComp
+$Comp
+L R R5
+U 1 1 569CE3C1
+P 3650 2400
+F 0 "R5" V 3730 2400 40  0000 C CNN
+F 1 "10K" V 3657 2401 40  0000 C CNN
+F 2 "~" V 3580 2400 30  0000 C CNN
+F 3 "~" H 3650 2400 30  0000 C CNN
+	1    3650 2400
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R6
+U 1 1 569CE3D0
+P 3650 3650
+F 0 "R6" V 3730 3650 40  0000 C CNN
+F 1 "1K" V 3657 3651 40  0000 C CNN
+F 2 "~" V 3580 3650 30  0000 C CNN
+F 3 "~" H 3650 3650 30  0000 C CNN
+	1    3650 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R7
+U 1 1 569CE3DF
+P 1300 2800
+F 0 "R7" V 1380 2800 40  0000 C CNN
+F 1 "10K" V 1307 2801 40  0000 C CNN
+F 2 "~" V 1230 2800 30  0000 C CNN
+F 3 "~" H 1300 2800 30  0000 C CNN
+	1    1300 2800
+	0    -1   -1   0   
+$EndComp
+$Comp
+L NPN Q1
+U 1 1 569CE3EE
+P 4050 2000
+F 0 "Q1" H 4050 1850 50  0000 R CNN
+F 1 "NPN" H 4050 2150 50  0000 R CNN
+F 2 "~" H 4050 2000 60  0000 C CNN
+F 3 "~" H 4050 2000 60  0000 C CNN
+	1    4050 2000
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R1
+U 1 1 569CE3FD
+P 1300 2600
+F 0 "R1" V 1380 2600 40  0000 C CNN
+F 1 "10K" V 1307 2601 40  0000 C CNN
+F 2 "~" V 1230 2600 30  0000 C CNN
+F 3 "~" H 1300 2600 30  0000 C CNN
+	1    1300 2600
+	0    -1   -1   0   
+$EndComp
+$Comp
+L SW_PUSH SW1
+U 1 1 569CE40C
+P 1300 2350
+F 0 "SW1" H 1450 2460 50  0000 C CNN
+F 1 "SW_RESET" H 1300 2270 50  0000 C CNN
+F 2 "~" H 1300 2350 60  0000 C CNN
+F 3 "~" H 1300 2350 60  0000 C CNN
+	1    1300 2350
+	1    0    0    -1  
+$EndComp
+$Comp
+L SW_PUSH SW2
+U 1 1 569CE41B
+P 4050 2800
+F 0 "SW2" H 4200 2910 50  0000 C CNN
+F 1 "SW_PROGRAM" H 4050 2720 50  0000 C CNN
+F 2 "~" H 4050 2800 60  0000 C CNN
+F 3 "~" H 4050 2800 60  0000 C CNN
+	1    4050 2800
+	1    0    0    -1  
+$EndComp
+$Comp
+L LED D1
+U 1 1 569CE42A
+P 4000 4000
+F 0 "D1" H 4000 4100 50  0000 C CNN
+F 1 "LED" H 4000 3900 50  0000 C CNN
+F 2 "~" H 4000 4000 60  0000 C CNN
+F 3 "~" H 4000 4000 60  0000 C CNN
+	1    4000 4000
+	1    0    0    -1  
+$EndComp
+$Comp
+L SPX2920M3-3.3 U1
+U 1 1 569CE45E
+P 3200 1550
+F 0 "U1" H 3200 1800 40  0000 C CNN
+F 1 "SPX2920M3-3.3" H 3200 1750 40  0000 C CNN
+F 2 "SOT223" H 3200 1650 35  0000 C CIN
+F 3 "" H 3200 1550 60  0000 C CNN
+	1    3200 1550
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_2 P2
+U 1 1 569CE4CF
+P 6400 1900
+F 0 "P2" V 6350 1900 40  0000 C CNN
+F 1 "CONN_2" V 6450 1900 40  0000 C CNN
+F 2 "" H 6400 1900 60  0000 C CNN
+F 3 "" H 6400 1900 60  0000 C CNN
+	1    6400 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_6 P3
+U 1 1 569CE4EE
+P 5800 3150
+F 0 "P3" V 5750 3150 60  0000 C CNN
+F 1 "CONN_6" V 5850 3150 60  0000 C CNN
+F 2 "" H 5800 3150 60  0000 C CNN
+F 3 "" H 5800 3150 60  0000 C CNN
+	1    5800 3150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1200 1550 1350 1550
+Wire Wire Line
+	1350 1550 1350 1450
+Wire Wire Line
+	1350 1450 1500 1450
+Wire Wire Line
+	1200 1750 1350 1750
+Wire Wire Line
+	1350 1750 1350 1850
+Wire Wire Line
+	1350 1850 1500 1850
+Text Label 2300 1850 0    60   ~ 0
+GND
+Text Label 2300 1450 0    60   ~ 0
+5Vcc
+Wire Wire Line
+	2300 1450 2500 1450
+Wire Wire Line
+	2500 1450 2500 1500
+Wire Wire Line
+	2500 1500 2800 1500
+Wire Wire Line
+	2300 1850 2500 1850
+Wire Wire Line
+	2500 1850 2500 1800
+Wire Wire Line
+	2500 1800 3200 1800
+Text Label 3600 1500 0    60   ~ 0
+3.3Vcc
+Text Label 1700 3300 2    60   ~ 0
+3.3Vcc
+Text Label 3150 3300 0    60   ~ 0
+GND
+NoConn ~ 2200 4000
+NoConn ~ 2300 4000
+NoConn ~ 2400 4000
+NoConn ~ 2500 4000
+NoConn ~ 2600 4000
+NoConn ~ 2700 4000
+NoConn ~ 1700 2700
+Wire Wire Line
+	1550 2800 1700 2800
+Text Label 1050 2800 2    60   ~ 0
+3.3Vcc
+Wire Wire Line
+	1700 2600 1550 2600
+Text Label 1050 2600 2    60   ~ 0
+3.3Vcc
+Text Label 1000 2350 2    60   ~ 0
+GND
+Text Label 3150 2600 0    60   ~ 0
+ESP_TX
+Text Label 3150 2700 0    60   ~ 0
+ESP_RX
+Text Label 4300 3000 0    60   ~ 0
+3.3Vcc
+Wire Wire Line
+	3150 3000 3800 3000
+Wire Wire Line
+	1700 2600 1700 2350
+Wire Wire Line
+	1700 2350 1600 2350
+Wire Wire Line
+	3750 2800 3750 3000
+Connection ~ 3750 3000
+Text Label 4350 2800 0    60   ~ 0
+GND
+Wire Wire Line
+	3150 3100 3750 3100
+Wire Wire Line
+	3750 3100 3750 3150
+Wire Wire Line
+	3750 3150 3800 3150
+Text Label 4300 3150 0    60   ~ 0
+3.3Vcc
+Text Label 4300 3300 0    60   ~ 0
+GND
+Wire Wire Line
+	3150 3200 3750 3200
+Wire Wire Line
+	3750 3200 3750 3300
+Wire Wire Line
+	3750 3300 3800 3300
+NoConn ~ 1700 3200
+NoConn ~ 1700 3100
+NoConn ~ 1700 3000
+NoConn ~ 1700 2900
+Text Label 3150 2800 0    60   ~ 0
+RELAY
+Text Label 3150 2900 0    60   ~ 0
+LED
+Wire Wire Line
+	3150 2800 3650 2800
+Wire Wire Line
+	3650 2000 3850 2000
+Wire Wire Line
+	4150 1800 4150 1450
+Wire Wire Line
+	4150 1450 4650 1450
+Wire Wire Line
+	3650 2800 3650 2650
+Wire Wire Line
+	3650 2150 3650 2000
+Text Label 4150 2200 3    60   ~ 0
+GND
+Text Label 5750 1450 0    60   ~ 0
+5Vcc
+Wire Wire Line
+	4650 1850 4600 1850
+Wire Wire Line
+	4600 1850 4600 2200
+Wire Wire Line
+	4600 2200 5800 2200
+Wire Wire Line
+	5800 2200 5800 1850
+NoConn ~ 4650 1750
+NoConn ~ 5750 1750
+Wire Wire Line
+	3150 2900 3650 2900
+Wire Wire Line
+	3650 2900 3650 3400
+Wire Wire Line
+	3650 3900 3650 4000
+Wire Wire Line
+	3650 4000 3800 4000
+Text Label 4200 4000 0    60   ~ 0
+GND
+NoConn ~ 5450 2900
+NoConn ~ 5450 3200
+NoConn ~ 5450 3300
+Text Label 5450 3400 2    60   ~ 0
+GND
+Text Label 5450 3000 2    60   ~ 0
+ESP_TX
+Text Label 5450 3100 2    60   ~ 0
+ESP_RX
+Wire Wire Line
+	5750 1850 5950 1850
+Wire Wire Line
+	4650 1950 4650 2150
+Wire Wire Line
+	4650 2150 5750 2150
+Wire Wire Line
+	5750 2150 5750 1950
+Wire Wire Line
+	5950 1850 5950 1800
+Wire Wire Line
+	5950 1800 6050 1800
+Connection ~ 5800 1850
+Wire Wire Line
+	5750 1950 5950 1950
+Wire Wire Line
+	5950 1950 5950 2000
+Wire Wire Line
+	5950 2000 6050 2000
+$EndSCHEMATC
