@@ -1,6 +1,11 @@
-update=lun 18 ene 2016 16:37:51 CET
+update=mar 19 ene 2016 10:04:39 CET
 version=1
 last_client=pcbnew
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms
 [general]
 version=1
 [eeschema]
@@ -44,12 +49,6 @@ LibName29=contrib
 LibName30=valves
 LibName31=relay
 LibName32=esp866_esp-12
-LibName33=transfo
-[cvpcb]
-version=1
-NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
 [pcbnew]
 version=1
 LastNetListRead=
@@ -88,3 +87,4 @@ LibName14=valves
 LibName15=relay
 LibName16=regulator
 LibName17=esp8266-12
+LibName18=power

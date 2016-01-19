@@ -5,5 +5,7 @@ syntax: glob
 *.pyc
 *.bin
 
-*.bak
-*.bck
+*bak
+*bck
+
+*/gerber/*

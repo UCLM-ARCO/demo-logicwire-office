@@ -31,14 +31,14 @@ LIBS:contrib
 LIBS:valves
 LIBS:relay
 LIBS:esp866_esp-12
-LIBS:transfo
+LIBS:light-node-cache
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title ""
-Date "18 jan 2016"
+Date "19 jan 2016"
 Rev ""
 Comp ""
 Comment1 ""
@@ -46,17 +46,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-$Comp
-L RZ03-1C4-D005 RL1
-U 1 1 569CD021
-P 5200 1700
-F 0 "RL1" H 5200 1300 60  0000 C CNN
-F 1 "RZ03-1C4-D005" H 5200 2100 60  0000 C CNN
-F 2 "~" H 5200 2100 60  0000 C CNN
-F 3 "~" H 5200 2100 60  0000 C CNN
-	1    5200 1700
-	1    0    0    -1  
-$EndComp
 $Comp
 L ESP866_ESP-12E U2
 U 1 1 569CDF5C
@@ -225,12 +214,12 @@ $EndComp
 $Comp
 L CONN_2 P2
 U 1 1 569CE4CF
-P 6400 1900
-F 0 "P2" V 6350 1900 40  0000 C CNN
-F 1 "CONN_2" V 6450 1900 40  0000 C CNN
-F 2 "" H 6400 1900 60  0000 C CNN
-F 3 "" H 6400 1900 60  0000 C CNN
-	1    6400 1900
+P 5800 2500
+F 0 "P2" V 5750 2500 40  0000 C CNN
+F 1 "CONN_2" V 5850 2500 40  0000 C CNN
+F 2 "" H 5800 2500 60  0000 C CNN
+F 3 "" H 5800 2500 60  0000 C CNN
+	1    5800 2500
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -256,22 +245,10 @@ Wire Wire Line
 	1350 1750 1350 1850
 Wire Wire Line
 	1350 1850 1500 1850
-Text Label 2300 1850 0    60   ~ 0
-GND
 Text Label 2300 1450 0    60   ~ 0
+GND
+Text Label 2300 1850 0    60   ~ 0
 5Vcc
-Wire Wire Line
-	2300 1450 2500 1450
-Wire Wire Line
-	2500 1450 2500 1500
-Wire Wire Line
-	2500 1500 2800 1500
-Wire Wire Line
-	2300 1850 2500 1850
-Wire Wire Line
-	2500 1850 2500 1800
-Wire Wire Line
-	2500 1800 3200 1800
 Text Label 3600 1500 0    60   ~ 0
 3.3Vcc
 Text Label 1700 3300 2    60   ~ 0
@@ -352,14 +329,6 @@ Text Label 4150 2200 3    60   ~ 0
 GND
 Text Label 5750 1450 0    60   ~ 0
 5Vcc
-Wire Wire Line
-	4650 1850 4600 1850
-Wire Wire Line
-	4600 1850 4600 2200
-Wire Wire Line
-	4600 2200 5800 2200
-Wire Wire Line
-	5800 2200 5800 1850
 NoConn ~ 4650 1750
 NoConn ~ 5750 1750
 Wire Wire Line
@@ -382,22 +351,38 @@ ESP_TX
 Text Label 5450 3100 2    60   ~ 0
 ESP_RX
 Wire Wire Line
-	5750 1850 5950 1850
+	2300 1850 2650 1850
 Wire Wire Line
-	4650 1950 4650 2150
+	2650 1850 2650 1500
 Wire Wire Line
-	4650 2150 5750 2150
+	2650 1500 2800 1500
 Wire Wire Line
-	5750 2150 5750 1950
+	2300 1450 2600 1450
 Wire Wire Line
-	5950 1850 5950 1800
+	2600 1450 2600 1800
 Wire Wire Line
-	5950 1800 6050 1800
-Connection ~ 5800 1850
-Wire Wire Line
-	5750 1950 5950 1950
-Wire Wire Line
-	5950 1950 5950 2000
-Wire Wire Line
-	5950 2000 6050 2000
+	2600 1800 3200 1800
+Text Label 1200 1550 0    60   ~ 0
+AC_N
+Text Label 1200 1750 0    60   ~ 0
+AC_L
+Text Label 4650 1850 2    60   ~ 0
+AC_L
+Text Label 5450 2600 2    60   ~ 0
+AC_N
+$Comp
+L RZ03-1C4-D005 RL1
+U 1 1 569CD021
+P 5200 1700
+F 0 "RL1" H 5200 1300 60  0000 C CNN
+F 1 "RZ03-1C4-D005" H 5200 2100 60  0000 C CNN
+F 2 "~" H 5200 2100 60  0000 C CNN
+F 3 "~" H 5200 2100 60  0000 C CNN
+	1    5200 1700
+	1    0    0    -1  
+$EndComp
+Text Label 4650 1950 2    60   ~ 0
+AC_Lout
+Text Label 5450 2400 2    60   ~ 0
+AC_Lout
 $EndSCHEMATC

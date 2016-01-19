@@ -1,0 +1,58 @@
+PCBNEW-LibModule-V1  mar 19 ene 2016 10:19:21 CET
+# encoding utf-8
+Units mm
+$INDEX
+Power 5V
+Power_USB_hack
+$EndINDEX
+$MODULE Power 5V
+Po 0 0 0 15 569DFB98 00000000 ~~
+Li Power 5V
+Sc 0
+AR 
+Op 0 0 0
+T0 0 0 1 1 0 0.15 N V 21 N "Power 5V"
+T1 0 0 1 1 0 0.15 N V 21 N "VAL**"
+$EndMODULE Power 5V
+$MODULE Power_USB_hack
+Po 0 0 0 15 569DFE8C 00000000 ~~
+Li Power_USB_hack
+Sc 0
+AR 
+Op 0 0 0
+T0 0.254 8.89 1 1 0 0.15 N V 21 N "Power 5V"
+T1 0.127 -8.8265 1 1 0 0.15 N V 21 N "VAL**"
+DS -25.019 -10.033 25.019 -10.033 0.15 21
+DS 25.019 -10.033 25.019 9.9695 0.15 21
+DS 25.019 9.9695 -25.019 9.9695 0.15 21
+DS -25.019 9.9695 -25.019 -10.033 0.15 21
+$PAD
+Sh "1" C 2.5 2.5 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po -24.765 -3.937
+$EndPAD
+$PAD
+Sh "2" C 2.5 2.5 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po -24.765 3.937
+$EndPAD
+$PAD
+Sh "4" C 2 2 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po 24.765 -3.937
+$EndPAD
+$PAD
+Sh "3" C 2 2 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po 24.765 3.937
+$EndPAD
+$EndMODULE Power_USB_hack
+$EndLIBRARY
