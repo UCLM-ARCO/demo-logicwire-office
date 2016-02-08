@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (22-Jun-2014 BZR 4027)-stable date = mar 19 ene 2016 10:23:05 CET
+Cmp-Mod V01 Created by CvPcb (22-Jun-2014 BZR 4027)-stable date = lun 08 feb 2016 14:07:48 CET
 
 BeginCmp
 TimeStamp = /569CE42A;
@@ -109,7 +109,7 @@ BeginCmp
 TimeStamp = /569CE00E;
 Reference = T1;
 ValeurCmp = 220 VAC 5 VDC;
-IdModule  = Power_USB_hack;
+IdModule  = USB_Power_Hack_v2;
 EndCmp
 
 BeginCmp
