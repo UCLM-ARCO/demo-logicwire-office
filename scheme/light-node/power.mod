@@ -1,10 +1,11 @@
-PCBNEW-LibModule-V1  lun 08 feb 2016 14:25:14 CET
+PCBNEW-LibModule-V1  mié 10 feb 2016 10:58:16 CET
 # encoding utf-8
 Units mm
 $INDEX
 Power 5V
 Power_USB_hack
 USB_Power_Hack_v2
+bornier2
 $EndINDEX
 $MODULE Power 5V
 Po 0 0 0 15 569DFB98 00000000 ~~
@@ -97,4 +98,40 @@ Ne 4 "/GND"
 Po 36.195 0.4445
 $EndPAD
 $EndMODULE USB_Power_Hack_v2
+$MODULE bornier2
+Po 0 0 0 15 56BB09A0 00000000 ~~
+Li bornier2
+Cd Bornier d'alimentation 2 pins
+Kw DEV
+Sc 0
+AR /569CE2FA
+Op 0 0 0
+T0 0 -5.08 1.524 1.524 0 0.3048 N I 21 N "P1"
+T1 6.477 0.762 1.524 1.524 900 0.3048 N V 21 N "INPUT"
+DS 5.08 2.54 -5.08 2.54 0.3048 24
+DS 5.08 3.81 5.08 -3.81 0.3048 24
+DS 5.08 -3.81 -5.08 -3.81 0.3048 24
+DS -5.08 -3.81 -5.08 3.81 0.3048 24
+DS -5.08 3.81 5.08 3.81 0.3048 24
+$PAD
+Sh "1" R 2.54 2.54 0 0 0
+Dr 1.524 0 0
+At STD N 00E0FFFF
+Ne 1 "/AC_L"
+Po -2.54 0
+$EndPAD
+$PAD
+Sh "2" C 2.54 2.54 0 0 0
+Dr 1.524 0 0
+At STD N 00E0FFFF
+Ne 2 "/AC_N"
+Po 2.54 0
+$EndPAD
+$SHAPE3D
+Na "device/bornier_2.wrl"
+Sc 1 1 1
+Of 0 0 0
+Ro 0 0 0
+$EndSHAPE3D
+$EndMODULE bornier2
 $EndLIBRARY
