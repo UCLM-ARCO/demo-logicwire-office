@@ -9,3 +9,5 @@ syntax: glob
 *bck
 
 */gerber/*
+*/esp8266_build
+src/*/node/config.h
