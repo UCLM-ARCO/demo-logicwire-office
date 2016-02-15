@@ -6,7 +6,4 @@
 // not be tracked.
 //
 
-#define WIFI_SSID       "myssid"
-#define WIFI_KEY        "mysecretkey"
-
-#define IDM_ADDR        "0350"
+#define IDM_ADDR "0350"

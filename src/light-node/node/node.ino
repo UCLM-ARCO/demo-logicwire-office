@@ -2,6 +2,7 @@
 
 #include <ESP8266WiFi.h>
 #include <ArduinoOTA.h>
+#include <Ticker.h>
 
 #include <ESP8266mDNS.h>     // force IDE to include this
 #include <EEPROM.h>          // force IDE to include this
@@ -90,6 +91,43 @@ DUO_IDM_Active_WI_setObserver(DUO_IDM_Active_WPtr self, IDM_Address observer) {
 }
 
 void
+IoT_NodeI_setupWiFi(IoT_NodePtr self, Ice_String ssid, Ice_String key) {
+    trace();
+
+    const char zero = 0;
+    IceC_Storage_put(DBINDEX_SSID, ssid.value, ssid.size);
+    IceC_Storage_put(DBINDEX_SSID + ssid.size, &zero, 1);
+    IceC_Storage_put(DBINDEX_WPAKEY, key.value, key.size);
+    IceC_Storage_put(DBINDEX_WPAKEY + key.size, &zero, 1);
+
+    Serial.print("Store wifi settings, ssid: '");
+    char ssid_[ssid.size + 1]; strncpy(ssid_, ssid.value, ssid.size); ssid_[ssid.size] = 0;
+    Serial.print(ssid_);
+    char key_[key.size + 1]; strncpy(key_, key.value, key.size); key_[key.size] = 0;
+    Serial.print("', key: '");
+    Serial.print(key_);
+    Serial.println("'");
+}
+
+void
+IoT_NodeI_setIDMRouter(IoT_NodePtr self, Ice_String proxy) {
+
+}
+
+Ticker async;
+
+void
+IoT_NodeI_restart(IoT_NodePtr self) {
+    Serial.println("Restarting node...");
+    async.attach(1, []() { ESP.restart(); });
+}
+
+void
+IoT_NodeI_factoryReset(IoT_NodePtr self) {
+    async.attach(1, []() { factory_reset(); });
+}
+
+void
 setup() {
     Serial.begin(115200);
     IceC_Storage_begin();
@@ -99,29 +137,7 @@ setup() {
     pinMode(PIN_LED, OUTPUT);
     pinMode(PIN_BUTTON, INPUT);
 
-    // connect to Wireless network
-    Serial.print("\n\nConnecting to ");
-    Serial.print(WIFI_SSID);
-
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(WIFI_SSID, WIFI_KEY);
-
-    int c=0;
-    while (WiFi.status() != WL_CONNECTED) {
-	c++;
-	Serial.print(".");
- 	check_buttons();
-
-	if (c > 60) {
-	    Serial.println("Connection failed! Rebooting...");
-	    delay(1000);
-	    ESP.restart();
-	}
-	delay(500);
-    }
-
-    Serial.print("\nWiFi connected, IP address: ");
-    Serial.println(WiFi.localIP());
+    setup_wireless();
 
     // setup OTA procedure
     ArduinoOTA.onStart([]() {
@@ -150,8 +166,8 @@ setup() {
     // setup IDM address, used as 'oid' on invocations
     String addr = IDM_ADDR;
     my_idm_address_items =
-     	(strtol(addr.substring(0, 2).c_str(), NULL, 16) && 0xff) << 8 +
-	(strtol(addr.substring(2, 2).c_str(), NULL, 16) && 0xff);
+     	strtol(addr.substring(0, 2).c_str(), NULL, 16) << 8 +
+	strtol(addr.substring(2, 4).c_str(), NULL, 16);
     my_idm_address.items = (Ice_Byte*)&my_idm_address_items;
     my_idm_address.size = 2;
 
@@ -164,51 +180,111 @@ setup() {
  	(&ic, "Adapter", local_endp, &adapter);
     Ice_ObjectAdapter_activate(&adapter);
 
-    // initialize and register actuator servant
-    IoT_IBoolI_init(&relay, DBINDEX_RELAY);
+    // initialize and register servants
     char oid[5];
-    utoa((my_idm_address_items >> 8) && 0xff, oid, 16);
-    utoa(my_idm_address_items && 0xff, oid + 2, 16);
+
+    addrToIdentity(my_idm_address_items + 1, oid);
+    IoT_IBoolI_init(&relay, DBINDEX_RELAY);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&relay, oid);
+
+    addrToIdentity(my_idm_address_items + 2, oid);
+    IoT_Node_init(&node);
+    Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&node, oid);
 
     Serial.println("IDM node address: " IDM_ADDR);
 
     // create dummy proxy to router (used with each sink's identity)
-    Ice_Communicator_stringToProxy(&ic, base_strprx, &sink);
+    // Ice_Communicator_stringToProxy(&ic, base_strprx, &sink);
 
     // announce idm objects on router
     announce_idm_objects();
 }
 
-// unsigned long t1 = millis();
-// unsigned long t2 = t1, t3 = t1;
+void
+addrToIdentity(uint16_t addr, char* dst) {
+    byte* src = (byte*)&addr;
+    const char* hex = "0123456789ABCDEF";
+
+    // platform is litle-endian
+    byte i;
+    for (i=0; i<2; i++) {
+	dst[2*i] = hex[(*(src+1-i) >> 4) & 0xF];
+	dst[2*i+1] = hex[*(src+1-i) & 0xF];
+    }
+    dst[2*i] = 0;
+}
+
+void
+setup_wireless() {
+    // get stored wireless settings
+    char ssid[MAX_SSID_SIZE];
+    ssid[0] = 0;
+    IceC_Storage_get(DBINDEX_SSID, ssid, MAX_SSID_SIZE);
+
+    // if available, try to connect
+    if (ssid[0] != 0) {
+	Serial.print("\n\nConnecting to ");
+	Serial.print(ssid);
+
+	char key[MAX_WPAKEY_SIZE];
+	IceC_Storage_get(DBINDEX_WPAKEY, key, MAX_WPAKEY_SIZE);
+
+	WiFi.mode(WIFI_STA);
+	WiFi.enableAP(false);
+	WiFi.begin(ssid, key);
+
+	check_wifi_connected();
+
+	Serial.print("\nWiFi connected, IP address: ");
+	Serial.println(WiFi.localIP());
+    }
+
+    // if not available, config as AP, using IDM addr for SSID
+    else {
+	strcpy(ssid, "NODE_" IDM_ADDR);
+	Serial.print("\n\nSetting up AP as ");
+	Serial.print(ssid);
+
+	WiFi.mode(WIFI_AP);
+	WiFi.enableSTA(false);
+	WiFi.softAP(ssid);
+
+	Serial.print("\nWiFi ready, IP address: ");
+	Serial.println(WiFi.softAPIP());
+    }
+}
+
+void
+check_wifi_connected() {
+    int c=0;
+    while (WiFi.status() != WL_CONNECTED) {
+    	c++;
+    	Serial.print(".");
+    	check_buttons();
+
+    	if (c > 60) {
+    	    Serial.println("Connection failed! Rebooting...");
+    	    delay(1000);
+    	    ESP.restart();
+    	}
+    	delay(500);
+    }
+}
+
+unsigned long t1 = millis();
 
 void
 loop() {
-//     // every 5 minutes
-//     if (millis() - t1 > 300000) {
-// 	t1 = millis();
-// 	announce_idm_objects();
-//     }
-//
-//     // every 30 seconds
-//     if (millis() - t2 > 30000) {
-// 	t2 = millis();
-// 	send_temperature();
-// 	send_ldr();
-// 	send_current();
-//     }
-//
-//     // every second
-//     if (millis() - t3 > 1000) {
-// 	t3 = millis();
-// 	check_pir();
-//     }
-//
-//     // as frequent as possible
-//     Ice_Communicator_loopIteration(&ic);
-    check_buttons();
+    // every 5 minutes
+    if (millis() - t1 > 300000) {
+    	t1 = millis();
+    	announce_idm_objects();
+    }
+
+    // as frequent as possible
+    Ice_Communicator_loopIteration(&ic);
     ArduinoOTA.handle();
+    check_buttons();
 }
 
 // void
@@ -251,6 +327,11 @@ check_buttons() {
     if (not erase)
 	return;
 
+    factory_reset();
+}
+
+void
+factory_reset() {
     Serial.println("Erasing EEPROM...");
     IceC_Storage_clear();
     Serial.println("EEPROM cleared! Restarting node...");
