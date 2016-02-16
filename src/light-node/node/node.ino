@@ -45,9 +45,11 @@ IoT_IBoolI relay;
 IoT_Node node;
 
 const char* local_endp = "tcp -p 4455";
-char base_strprx[MAX_PROXY_SIZE];
 uint16_t my_idm_address_items;
 IDM_Address my_idm_address;
+
+Ticker async;
+bool send_advs_now = false;
 
 // forward declaration here to avoid errors produced by Arduino IDE
 // when generating .cpp from .ino
@@ -69,25 +71,30 @@ IoT_IBoolI_init(IoT_IBoolIPtr self, uint16_t observer_dbindex) {
 
 void
 DUO_IDM_IBool_WI_set(DUO_IDM_IBool_WPtr self, Ice_Bool v, IDM_Address source) {
-    Serial.println("set called");
+    Serial.printf("DUO: set state to %s\n", v ? "True" : "False");
+    digitalWrite(PIN_RELAY, v ? HIGH : LOW);
+    digitalWrite(PIN_LED, v ? HIGH : LOW);
 
-//     IoT_IBoolIPtr self = (IoT_IBoolIPtr)self_;
-//     byte msg[] = {self->cmd, v};
-//
-//     i2c_send(msg, 2);
-//
-//     if (((ActiveServantPtr)self)->observer_id[0] == 0)
-// 	return;
-//
-//     // notify event
-//     Ice_ObjectPrx_ice_identity(&sink, ((ActiveServantPtr)self)->observer_id);
-//     DUO_IDM_IBool_W_set(&sink, v, my_idm_address);
+    if (((IoT_IBoolIPtr)self)->observer_id[0] == 0)
+ 	return;
+
+    if (is_null_proxy(&sink))
+	return;
+
+    // notify event
+    Serial.printf("DUO: notify to '%s'\n", ((IoT_IBoolIPtr)self)->observer_id);
+    Ice_ObjectPrx_ice_identity(&sink, ((IoT_IBoolIPtr)self)->observer_id);
+    DUO_IDM_IBool_W_set(&sink, v, my_idm_address);
 }
 
 void
-DUO_IDM_Active_WI_setObserver(DUO_IDM_Active_WPtr self, IDM_Address observer) {
-    //     bytesToHex(self->observer_id, observer.items, 2);
-    //     IceC_Storage_put(self->observer_dbindex, self->observer_id, 4);
+DUO_IDM_Active_WI_setObserver(DUO_IDM_Active_WPtr self_, IDM_Address observer) {
+    IoT_IBoolIPtr self = (IoT_IBoolIPtr)self_;
+    uint16_t ob_addr = (observer.items[0] << 8) + observer.items[1];
+
+    addr_to_identity(ob_addr, self->observer_id);
+    IceC_Storage_put(self->observer_dbindex, self->observer_id, 5);
+    Serial.printf("DUO: set observer to '%s'\n", self->observer_id);
 }
 
 void
@@ -100,31 +107,29 @@ IoT_NodeI_setupWiFi(IoT_NodePtr self, Ice_String ssid, Ice_String key) {
     IceC_Storage_put(DBINDEX_WPAKEY, key.value, key.size);
     IceC_Storage_put(DBINDEX_WPAKEY + key.size, &zero, 1);
 
-    Serial.print("Store wifi settings, ssid: '");
     char ssid_[ssid.size + 1]; strncpy(ssid_, ssid.value, ssid.size); ssid_[ssid.size] = 0;
-    Serial.print(ssid_);
     char key_[key.size + 1]; strncpy(key_, key.value, key.size); key_[key.size] = 0;
-    Serial.print("', key: '");
-    Serial.print(key_);
-    Serial.println("'");
+    Serial.printf("WiFi: store settings, ssid: '%s', key: '%s'\n", ssid_, key_);
 }
 
 void
 IoT_NodeI_setIDMRouter(IoT_NodePtr self, Ice_String proxy) {
+    const char zero = 0;
+    IceC_Storage_put(DBINDEX_ROUTER, proxy.value, proxy.size);
+    IceC_Storage_put(DBINDEX_ROUTER + proxy.size, &zero, 1);
 
+    async.once(1, []() { create_router_proxy(); });
 }
-
-Ticker async;
 
 void
 IoT_NodeI_restart(IoT_NodePtr self) {
-    Serial.println("Restarting node...");
-    async.attach(1, []() { ESP.restart(); });
+    Serial.println("Node: restarting...");
+    async.once(1, []() { ESP.restart(); });
 }
 
 void
 IoT_NodeI_factoryReset(IoT_NodePtr self) {
-    async.attach(1, []() { factory_reset(); });
+    async.once(1, []() { factory_reset(); });
 }
 
 void
@@ -141,19 +146,19 @@ setup() {
 
     // setup OTA procedure
     ArduinoOTA.onStart([]() {
-	    Serial.println("OTA: Start");
+	    Serial.println("OTA: start");
 	});
 
     ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-	    Serial.printf("OTA: Progress: %u%%\r", (progress / (total / 100)));
+	    Serial.printf("OTA: progress: %u%%\r", (progress / (total / 100)));
 	});
 
     ArduinoOTA.onEnd([]() {
-	    Serial.println("\nOTA: End");
+	    Serial.println("\nOTA: end");
 	});
 
     ArduinoOTA.onError([](ota_error_t error) {
-	    Serial.printf("OTA Error[%u]: ", error);
+	    Serial.printf("OTA error[%u]: ", error);
 	    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
 	    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
 	    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
@@ -166,7 +171,7 @@ setup() {
     // setup IDM address, used as 'oid' on invocations
     String addr = IDM_ADDR;
     my_idm_address_items =
-     	strtol(addr.substring(0, 2).c_str(), NULL, 16) << 8 +
+     	(strtol(addr.substring(0, 2).c_str(), NULL, 16) << 8) +
 	strtol(addr.substring(2, 4).c_str(), NULL, 16);
     my_idm_address.items = (Ice_Byte*)&my_idm_address_items;
     my_idm_address.size = 2;
@@ -183,25 +188,50 @@ setup() {
     // initialize and register servants
     char oid[5];
 
-    addrToIdentity(my_idm_address_items + 1, oid);
+    addr_to_identity(my_idm_address_items + 1, oid);
     IoT_IBoolI_init(&relay, DBINDEX_RELAY);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&relay, oid);
 
-    addrToIdentity(my_idm_address_items + 2, oid);
+    addr_to_identity(my_idm_address_items + 2, oid);
     IoT_Node_init(&node);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&node, oid);
 
-    Serial.println("IDM node address: " IDM_ADDR);
+    Serial.println("IDM: node address: " IDM_ADDR);
 
-    // create dummy proxy to router (used with each sink's identity)
-    // Ice_Communicator_stringToProxy(&ic, base_strprx, &sink);
-
-    // announce idm objects on router
-    announce_idm_objects();
+    // create dummy proxy to router and announce objects
+    create_router_proxy();
+    async.once(15, []() {
+	    send_advs_now = true;
+	    async.attach(180, []() {
+		    send_advs_now = true;
+		});
+	});
 }
 
 void
-addrToIdentity(uint16_t addr, char* dst) {
+create_router_proxy() {
+    // get proxy from local storage
+    char strprx[MAX_PROXY_SIZE];
+    IceC_Storage_get(DBINDEX_ROUTER, strprx, MAX_PROXY_SIZE);
+
+    // if not available, set proxy as null proxy
+    if (strprx[0] == 0) {
+	((ObjectPtr)&sink)->tag = NULL;
+	return;
+    }
+
+    // otherwise, create proxy
+    Ice_Communicator_stringToProxy(&ic, strprx, &sink);
+    Serial.printf("IDM: using router '%s'\n", strprx);
+}
+
+bool
+is_null_proxy(Ice_ObjectPrxPtr prx) {
+    return ((ObjectPtr)prx)->tag != TAG_OK;
+}
+
+void
+addr_to_identity(uint16_t addr, char* dst) {
     byte* src = (byte*)&addr;
     const char* hex = "0123456789ABCDEF";
 
@@ -223,8 +253,7 @@ setup_wireless() {
 
     // if available, try to connect
     if (ssid[0] != 0) {
-	Serial.print("\n\nConnecting to ");
-	Serial.print(ssid);
+	Serial.printf("\n\nWiFi: connecting to '%s'", ssid);
 
 	char key[MAX_WPAKEY_SIZE];
 	IceC_Storage_get(DBINDEX_WPAKEY, key, MAX_WPAKEY_SIZE);
@@ -235,21 +264,20 @@ setup_wireless() {
 
 	check_wifi_connected();
 
-	Serial.print("\nWiFi connected, IP address: ");
+	Serial.printf("\nWiFi: connected, IP address: ");
 	Serial.println(WiFi.localIP());
     }
 
     // if not available, config as AP, using IDM addr for SSID
     else {
 	strcpy(ssid, "NODE_" IDM_ADDR);
-	Serial.print("\n\nSetting up AP as ");
-	Serial.print(ssid);
+	Serial.printf("\n\nWiFi: setting up AP as '%s'\n", ssid);
 
 	WiFi.mode(WIFI_AP);
 	WiFi.enableSTA(false);
 	WiFi.softAP(ssid);
 
-	Serial.print("\nWiFi ready, IP address: ");
+	Serial.print("WiFi: ready, IP address: ");
 	Serial.println(WiFi.softAPIP());
     }
 }
@@ -263,7 +291,7 @@ check_wifi_connected() {
     	check_buttons();
 
     	if (c > 60) {
-    	    Serial.println("Connection failed! Rebooting...");
+    	    Serial.println("WiFi: connection failed! Rebooting...");
     	    delay(1000);
     	    ESP.restart();
     	}
@@ -271,40 +299,17 @@ check_wifi_connected() {
     }
 }
 
-unsigned long t1 = millis();
-
 void
 loop() {
-    // every 5 minutes
-    if (millis() - t1 > 300000) {
-    	t1 = millis();
-    	announce_idm_objects();
+    if (send_advs_now) {
+	send_advs_now = false;
+	announce_idm_objects();
     }
 
-    // as frequent as possible
     Ice_Communicator_loopIteration(&ic);
     ArduinoOTA.handle();
     check_buttons();
 }
-
-// void
-// set_leds(byte r, byte o, byte g) {
-//
-//     {
-// 	byte msg[] = {CMD_WRITE_LED_R, r};
-// 	i2c_send(msg, 2);
-//     }
-//
-//     {
-// 	byte msg[] = {CMD_WRITE_LED_O, o};
-// 	i2c_send(msg, 2);
-//     }
-//
-//     {
-// 	byte msg[] = {CMD_WRITE_LED_G, g};
-// 	i2c_send(msg, 2);
-//     }
-// }
 
 void
 check_buttons() {
@@ -332,9 +337,9 @@ check_buttons() {
 
 void
 factory_reset() {
-    Serial.println("Erasing EEPROM...");
+    Serial.print("\nNode: erasing EEPROM... ");
     IceC_Storage_clear();
-    Serial.println("EEPROM cleared! Restarting node...");
+    Serial.println("done! Restarting node...");
 
     digitalWrite(PIN_LED, LOW);
     delay(500);
@@ -344,129 +349,35 @@ factory_reset() {
 
 void
 announce_idm_objects() {
-//     Ice_ObjectPrx_ice_identity(&sink, IDM_ROUTER);
-//
-//     String local_addr = WiFi.localIP().toString();
-//     Ice_String ice_strprx;
-//     String strprx;
-//
-// #define ADV(oid)							\
-//     strprx = String(oid) + " -o:" + local_endp + " -h " + local_addr;	\
-//     Ice_String_init(ice_strprx, strprx.c_str());			\
-//     IDM_NeighborDiscovery_Listener_adv(&sink, ice_strprx);
-//
-//     ADV(((ActiveServantPtr)&relay)->object_id);
-//     ADV(((ActiveServantPtr)&led_r)->object_id);
-//     ADV(((ActiveServantPtr)&led_o)->object_id);
-//     ADV(((ActiveServantPtr)&led_g)->object_id);
-//
-//     ADV(((ActiveServantPtr)&temperature)->object_id);
-//     ADV(((ActiveServantPtr)&current)->object_id);
-//     ADV(((ActiveServantPtr)&pir)->object_id);
-//     ADV(((ActiveServantPtr)&ldr)->object_id);
-}
+    if (is_null_proxy(&sink))
+	return;
 
-// // Note: sizeof(State) returns an invalid value. This may be caused by
-// // alignment. Please, review the size defined in the following
-// // constant if you change the struct
-//
-// #define State_size 8
-// typedef struct State {
-//     uint8_t size;
-//     uint16_t current;
-//     uint16_t microphone;
-//     uint16_t ldr;
-//     uint8_t pir;
-// } State;
-//
-// struct State
-// retrieve_state() {
-//     Wire.requestFrom(ARDSENSE_ADDR, State_size);
-//
-//     State state;
-//     unsigned long ts = millis();
-//     while(!Wire.available()) {
-//
-// 	// timeout expired and no data received?
-// 	if (millis() - ts > 2000)
-// 	    return state;
-//     }
-//
-//     state.size = Wire.read();
-//     state.current = (uint16_t)Wire.read() + ((uint16_t)Wire.read() & 0xff << 8);
-//     state.microphone = (uint16_t)Wire.read() + ((uint16_t)Wire.read() & 0xff << 8);
-//     state.ldr = (uint16_t)Wire.read() + ((uint16_t)Wire.read() & 0xff << 8);
-//     state.pir = Wire.read();
-//
-//     return state;
-// }
-//
-// int
-// get_temperature() {
-//     // int address = 0x49;  // ADDR if ADD0 to Vcc (like on node-rs485)
-//     int address = 0x48;     // ADDR if ADD0 is GND (like on node-esp266)
-//     byte msb, lsb;
-//     int temperature;
-//
-//     Wire.requestFrom(address, 2);
-//
-//     unsigned long ts = millis();
-//     while(!Wire.available()) {
-// 	// timeout expired and no data received?
-// 	if (millis() - ts > 2000)
-// 	    return 0;
-//     }
-//
-//     msb = Wire.read();
-//     lsb = Wire.read();
-//     temperature = ((msb) << 4);
-//     temperature |= (lsb >> 4);
-//
-//     return (int)((temperature * 0.0625) * 10);
-// }
-//
-// void
-// send_temperature() {
-//     if (temperature.observer_id[0] == 0)
-// 	return;
-//
-//     int value = get_temperature();
-//     Ice_ObjectPrx_ice_identity(&sink, temperature.observer_id);
-//     DUO_IDM_IInt_W_set(&sink, value, my_idm_address);
-// }
-//
-// void
-// send_current() {
-//     if (current.observer_id[0] == 0)
-// 	return;
-//
-//     int value = retrieve_state().current;
-//     Ice_ObjectPrx_ice_identity(&sink, current.observer_id);
-//     DUO_IDM_IInt_W_set(&sink, value, my_idm_address);
-// }
-//
-// void
-// send_ldr() {
-//     if (ldr.observer_id[0] == 0)
-// 	return;
-//
-//     int value = retrieve_state().ldr;
-//     Ice_ObjectPrx_ice_identity(&sink, ldr.observer_id);
-//     DUO_IDM_IInt_W_set(&sink, value, my_idm_address);
-// }
-//
-// void
-// check_pir() {
-//     if (pir.observer_id[0] == 0)
-// 	return;
-//
-//     static bool saved_state = false;
-//     bool current_state = retrieve_state().pir;
-//
-//     if (current_state == saved_state)
-// 	return;
-//
-//     saved_state = current_state;
-//     Ice_ObjectPrx_ice_identity(&sink, pir.observer_id);
-//     DUO_IDM_IBool_W_set(&sink, current_state, my_idm_address);
-// }
+    // get IDM router identity from storage
+    char oid[5];
+    IceC_Storage_get(DBINDEX_ROUTER, oid, 4);
+    oid[4] = 0;
+
+    // recreate router's proxy
+    Ice_ObjectPrx_ice_identity(&sink, oid);
+
+    String local_addr;
+    if (WiFi.getMode() == WIFI_AP)
+	local_addr = WiFi.softAPIP().toString();
+    else
+	local_addr = WiFi.localIP().toString();
+
+    Ice_String ice_strprx;
+    String strprx;
+
+#define ADV(oid)							\
+    strprx = String(oid) + " -o:" + local_endp + " -h " + local_addr;	\
+    Ice_String_init(ice_strprx, strprx.c_str());			\
+    IDM_NeighborDiscovery_Listener_adv(&sink, ice_strprx);
+
+    addr_to_identity(my_idm_address_items + 1, oid);
+    ADV(oid);
+    addr_to_identity(my_idm_address_items + 2, oid);
+    ADV(oid);
+
+    Serial.println("IDM: advertisements sent");
+}
