@@ -95,12 +95,14 @@ class Client(Ice.Application):
 
     def get_proxy(self, oid, args):
         ic = self.communicator()
-        addr = args[1][:3] + oid
+        addr = args[1].replace(":", "")
+        addr = addr[:3] + oid
         host = args[2]
         proxy = "{} -e 1.0 -o:tcp -h {} -p 4455".format(addr, host)
         return ic.stringToProxy(proxy)
 
     def string_to_addr(self, s):
+        s = s.replace(":", "")
         return int(s[:2], 16), int(s[2:], 16)
 
 
