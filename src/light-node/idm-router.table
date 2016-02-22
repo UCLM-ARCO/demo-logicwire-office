@@ -1,0 +1,5 @@
+: DO NOT EDIT, it will be overwritten!
+: destination | endpoints | mode
+: --------------------------------------------------
+1001 | tcp -h 192.168.4.1 -p 4455 -t 60000 | o
+1002 | tcp -h 192.168.4.1 -p 4455 -t 60000 | o

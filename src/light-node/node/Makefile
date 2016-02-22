@@ -48,7 +48,7 @@ ota-upload:
 	    -f $(BUILD_DIR)/${SOURCE:%.ino=%.cpp.bin}
 
 arduino-set-prefs:
-	arduino --board $(BOARD) --save-prefs
+	arduino --board $(BOARD) --pref custom_FlashSize=generic_4M1M --save-prefs
 
 tty:
 	@echo "Press Ctrl + 4 to exit"
