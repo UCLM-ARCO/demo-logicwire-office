@@ -19,8 +19,14 @@
 #define MAX_PROXY_SIZE  64
 
 #define PIN_BUTTON      0
-#define PIN_LED         4
-#define PIN_RELAY       5
+
+// Settings for ARCO Muffin
+// #define PIN_LED         4
+// #define PIN_RELAY       5
+
+// Settings for ITEAD Sonoff
+#define PIN_LED         13
+#define PIN_RELAY       12
 
 #define DBINDEX_SSID    0
 #define DBINDEX_WPAKEY  DBINDEX_SSID + MAX_SSID_SIZE
