@@ -25,10 +25,10 @@ class Client(Ice.Application):
         elif "--set" in args:
             self.set_state(args)
 
-        elif "--setObserver" in args:
+        elif "--set-observer" in args:
             self.set_observer(args)
 
-        elif "--setRouter" in args:
+        elif "--set-router" in args:
             self.set_router(args)
 
         else:
@@ -41,8 +41,8 @@ class Client(Ice.Application):
                "     [--restart]\n"
                "     [--factory-reset]\n"
                "     [--set STATE]\n"
-               "     [--setObserver ADDR]\n"
-               "     [--setRouter PROXY]")
+               "     [--set-observer ADDR]\n"
+               "     [--set-router PROXY]")
         return 1
 
     def setup_wifi(self, args):
@@ -76,21 +76,21 @@ class Client(Ice.Application):
 
     def set_observer(self, args):
         node = self.get_state_proxy(args)
-        addr = args[args.index("--setObserver") + 1]
+        addr = args[args.index("--set-observer") + 1]
         addr = self.string_to_addr(addr)
         node.setObserver(addr)
 
     def set_router(self, args):
         node = self.get_config_proxy(args)
-        router = args[args.index("--setRouter") + 1]
+        router = args[args.index("--set-router") + 1]
         node.setIDMRouter(router)
 
     def get_config_proxy(self, args):
-        proxy = self.get_proxy("2", args)
+        proxy = self.get_proxy("1", args)
         return IoT.NodePrx.uncheckedCast(proxy)
 
     def get_state_proxy(self, args):
-        proxy = self.get_proxy("1", args)
+        proxy = self.get_proxy("2", args)
         return IoT.IBoolPrx.uncheckedCast(proxy)
 
     def get_proxy(self, oid, args):

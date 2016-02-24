@@ -12,3 +12,4 @@ syntax: glob
 */esp8266_build
 src/*/node/config.h
 src/*/node/iot.h
+*.table

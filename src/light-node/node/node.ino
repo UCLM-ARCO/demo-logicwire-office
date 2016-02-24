@@ -195,12 +195,12 @@ setup() {
     char oid[5];
 
     addr_to_identity(my_idm_address_items + 1, oid);
-    IoT_IBoolI_init(&relay, DBINDEX_RELAY);
-    Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&relay, oid);
-
-    addr_to_identity(my_idm_address_items + 2, oid);
     IoT_Node_init(&node);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&node, oid);
+
+    addr_to_identity(my_idm_address_items + 2, oid);
+    IoT_IBoolI_init(&relay, DBINDEX_RELAY);
+    Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&relay, oid);
 
     Serial.println("IDM: node address: " IDM_ADDR);
 
