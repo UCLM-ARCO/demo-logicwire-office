@@ -60,12 +60,12 @@ class Client(Ice.Application):
         node.factoryReset()
 
     def set_observer(self, args):
-        addr = args[args.index("--set-observer") + 2]
-        addr = self.string_to_addr(addr)
-
         # first object is node, buttons are 2, 3...
         button = args[args.index("--set-observer") + 1]
         button = str(int(button) + 1)
+
+        addr = args[args.index("--set-observer") + 2]
+        addr = self.string_to_addr(addr)
 
         node = self.get_proxy(button, args)
         node = IoT.IBoolPrx.uncheckedCast(node)

@@ -84,7 +84,8 @@ DUO_IDM_Active_WI_setObserver(DUO_IDM_Active_WPtr self_, IDM_Address observer) {
 
     addr_to_identity(ob_addr, self->observer_id);
     IceC_Storage_put(self->observer_dbindex, self->observer_id, 5);
-    Serial.printf("DUO: set B%d observer to '%s'\n", self->pin, self->observer_id);
+    byte button_id = self->pin == PIN_BUTTON1 ? 1 : 2;
+    Serial.printf("DUO: set B%d observer to '%s'\n", button_id, self->observer_id);
 }
 
 void
@@ -386,7 +387,7 @@ send_button_changes() {
 	    delay(50);  // fix bouncing
 	    button1.state = s1;
 
-	    Serial.printf("DUO: send state of B1 to '%s'\n", button1.observer_id);
+	    Serial.printf("DUO: send state of B1 (%d) to '%s'\n", s1, button1.observer_id);
 	    Ice_ObjectPrx_ice_identity(&sink, button1.observer_id);
 	    DUO_IDM_IBool_W_set(&sink, s1, my_idm_address);
 	}
@@ -396,10 +397,9 @@ send_button_changes() {
 	bool s2 = digitalRead(button2.pin);
 	if (s2 != button2.state) {
 	    delay(50);  // fix bouncing
-	    Serial.printf("Change of B2: %d\n", s2);
 	    button2.state = s2;
 
-	    Serial.printf("DUO: send state of B2 to '%s'\n", button2.observer_id);
+	    Serial.printf("DUO: send state of B2 (%d) to '%s'\n", s2, button2.observer_id);
 	    Ice_ObjectPrx_ice_identity(&sink, button2.observer_id);
 	    DUO_IDM_IBool_W_set(&sink, s2, my_idm_address);
 	}

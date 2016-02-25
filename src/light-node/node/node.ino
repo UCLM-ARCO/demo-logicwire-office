@@ -141,6 +141,7 @@ IoT_NodeI_factoryReset(IoT_NodePtr self) {
 void
 setup() {
     Serial.begin(115200);
+    Serial.printf("\n\nSYSTEM: free flash space: %d\n", ESP.getFreeSketchSpace());
     IceC_Storage_begin();
 
     // setup gpio
@@ -259,11 +260,11 @@ setup_wireless() {
 
     // if available, try to connect
     if (ssid[0] != 0) {
-	Serial.printf("\n\nWiFi: connecting to '%s'", ssid);
-
 	char key[MAX_WPAKEY_SIZE];
 	IceC_Storage_get(DBINDEX_WPAKEY, key, MAX_WPAKEY_SIZE);
 
+	Serial.printf("WiFi: connecting to '%s'", ssid);
+	WiFi.disconnect();
 	WiFi.mode(WIFI_STA);
 	WiFi.enableAP(false);
 	WiFi.begin(ssid, key);
@@ -277,7 +278,7 @@ setup_wireless() {
     // if not available, config as AP, using IDM addr for SSID
     else {
 	strcpy(ssid, "NODE_" IDM_ADDR);
-	Serial.printf("\n\nWiFi: setting up AP as '%s'\n", ssid);
+	Serial.printf("WiFi: setting up AP as '%s'\n", ssid);
 
 	WiFi.mode(WIFI_AP);
 	WiFi.enableSTA(false);
@@ -297,7 +298,7 @@ check_wifi_connected() {
     	check_buttons();
 
     	if (c > 60) {
-    	    Serial.println("WiFi: connection failed! Rebooting...");
+    	    Serial.println("\nWiFi: connection failed! Rebooting...");
     	    delay(1000);
     	    ESP.restart();
     	}
