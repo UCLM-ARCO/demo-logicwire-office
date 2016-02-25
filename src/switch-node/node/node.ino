@@ -264,7 +264,8 @@ setup_wireless() {
 	char key[MAX_WPAKEY_SIZE];
 	IceC_Storage_get(DBINDEX_WPAKEY, key, MAX_WPAKEY_SIZE);
 
-	Serial.printf("WiFi: connecting to '%s', using key '%s'", ssid, key);
+	Serial.printf("WiFi: connecting to '%s'", ssid);
+	WiFi.disconnect();
 	WiFi.mode(WIFI_STA);
 	WiFi.enableAP(false);
 	WiFi.begin(ssid, key);
@@ -376,40 +377,31 @@ announce_idm_objects() {
 
 void
 send_button_changes() {
-    bool s1 = digitalRead(button1.pin);
-    if (s1 != button1.state) {
-	delay(50);  // fix bouncing
-	Serial.printf("Change of B1: %d\n", s1);
-	button1.state = s1;
+    if (is_null_proxy(&sink))
+    	return;
+
+    if (button1.observer_id[0] != 0) {
+	bool s1 = digitalRead(button1.pin);
+	if (s1 != button1.state) {
+	    delay(50);  // fix bouncing
+	    button1.state = s1;
+
+	    Serial.printf("DUO: send state of B1 to '%s'\n", button1.observer_id);
+	    Ice_ObjectPrx_ice_identity(&sink, button1.observer_id);
+	    DUO_IDM_IBool_W_set(&sink, s1, my_idm_address);
+	}
     }
 
-    bool s2 = digitalRead(button2.pin);
-    if (s2 != button2.state) {
-	delay(50);  // fix bouncing
-	Serial.printf("Change of B2: %d\n", s2);
-	button2.state = s2;
+    if (button2.observer_id[0] != 0) {
+	bool s2 = digitalRead(button2.pin);
+	if (s2 != button2.state) {
+	    delay(50);  // fix bouncing
+	    Serial.printf("Change of B2: %d\n", s2);
+	    button2.state = s2;
+
+	    Serial.printf("DUO: send state of B2 to '%s'\n", button2.observer_id);
+	    Ice_ObjectPrx_ice_identity(&sink, button2.observer_id);
+	    DUO_IDM_IBool_W_set(&sink, s2, my_idm_address);
+	}
     }
-
-    // if (is_null_proxy(&sink))
-    // 	return;
-
-    // if (button1.observer_id[0] != 0) {
-    // 	bool s1 = digitalRead(button1.pin);
-    // 	if (s1 != button1.state) {
-    // 	    Serial.printf("DUO: send state of B1 to '%s'\n", button1.observer_id);
-    // 	    Ice_ObjectPrx_ice_identity(&sink, button1.observer_id);
-    // 	    DUO_IDM_IBool_W_set(&sink, s1, my_idm_address);
-    // 	    button1.state = s1;
-    // 	}
-    // }
-
-    // if (button2.observer_id[0] != 0) {
-    // 	bool s2 = digitalRead(button2.pin);
-    // 	if (s2 != button2.state) {
-    // 	    Serial.printf("DUO: send state of B2 to '%s'\n", button2.observer_id);
-    // 	    Ice_ObjectPrx_ice_identity(&sink, button2.observer_id);
-    // 	    DUO_IDM_IBool_W_set(&sink, s2, my_idm_address);
-    // 	    button2.state = s2;
-    // 	}
-    // }
 }
