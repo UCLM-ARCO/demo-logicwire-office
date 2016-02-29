@@ -69,9 +69,9 @@ class Client(Ice.Application):
         node.set(state, "\xc1\xc2")
 
         # import time
-        # for i in range(10):
+        # for i in range(30):
         #     state = not state
-        #     time.sleep(0.01)
+        #     time.sleep(0.2)
         #     node.set(state, "\xc1\xc2")
 
     def set_observer(self, args):

@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Logic Wiring</string>
+    <string name="welcome">Welcome!</string>
+    <string name="lets_begin">Let\'s begin setting up the place…</string>
+    <string name="start">START</string>
+    <string name="pref_idm_router">IDM Router proxy</string>
+    <string name="action_settings">Settings</string>
+    <string name="scan_qr_prompt">Looking for a QR code…</string>
+</resources>

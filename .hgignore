@@ -13,3 +13,6 @@ syntax: glob
 src/*/node/config.h
 src/*/node/iot.h
 *.table
+
+src/android/*/*/build
+src/android/*/local.properties
