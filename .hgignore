@@ -14,5 +14,14 @@ src/*/node/config.h
 src/*/node/iot.h
 *.table
 
-src/android/*/*/build
-src/android/*/local.properties
+
+.gitignore
+.gradle
+local.properties
+.idea
+.DS_Store
+build
+*.iml
+gradlew
+gradlew.bat
+*.jar

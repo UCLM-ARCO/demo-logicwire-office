@@ -6,4 +6,11 @@
     <string name="pref_idm_router">IDM Router proxy</string>
     <string name="action_settings">Settings</string>
     <string name="scan_qr_prompt">Looking for a QR code…</string>
+    <string name="error_invalid_usage">Internal Error: invalid usage of RetrieveJSONConfig</string>
+    <string name="error_invalid_contents">Invalid QR contents</string>
+    <string name="error_cant_connect">Could not connect to</string>
+    <string name="error_invalid_retrieved_config">Invalid configuration retrieved: not in JSON format.</string>
+    <string name="section_sender">Senders:</string>
+    <string name="section_receiver">Receivers:</string>
+    <string name="action_add">Add new Thing</string>
 </resources>

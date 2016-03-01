@@ -5,6 +5,7 @@ android {
     buildToolsVersion "23.0.2"
     defaultConfig {
         applicationId "es.uclm.esi.arco.logicwiring"
+        generatedDensities = []
         minSdkVersion 19
         targetSdkVersion 23
         versionCode 1
@@ -18,13 +19,19 @@ android {
     }
     productFlavors {
     }
+
+    aaptOptions {
+        additionalParameters "--no-version-vectors"
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.2.0'
 
+    compile 'com.android.support:appcompat-v7:23.2.0'
+    compile 'com.android.support:design:23.2.0'
+    compile 'com.android.support:support-v4:23.2.0'
     compile 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
     compile 'com.google.zxing:core:3.2.1'
 }
