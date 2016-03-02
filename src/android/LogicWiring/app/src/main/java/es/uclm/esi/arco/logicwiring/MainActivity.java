@@ -23,7 +23,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Objects;
+
+import Ice.ObjectPrx;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,7 +35,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private final static String PREF_IDM_ROUTER = "pref_idm_router";
-    private Action current_action;
+    private Action _current_action;
+    private Ice.Communicator _ic;
+    private ObjectPrx _router;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +48,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (idm_str_proxy.isEmpty())
             setContentView(R.layout.welcome_activity);
+
         else {
             setContentView(R.layout.things_activity);
+            createCommunicator();
+            createIDMRouter(idm_str_proxy);
         }
     }
 
@@ -61,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add:
-                current_action = Action.ADD_THING;
+                _current_action = Action.ADD_THING;
                 getQRScannerIntentIntegrator().initiateScan();
                 return true;
 
@@ -71,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onStartClicked(View view) {
-        current_action = Action.FETCH_CONFIG;
+        _current_action = Action.FETCH_CONFIG;
         getQRScannerIntentIntegrator().initiateScan();
     }
 
@@ -92,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String content = result.getContents();
-        switch (current_action) {
+        switch (_current_action) {
             case ADD_THING:
                 System.out.println("GOT ADDRESS: " + content);
                 break;
@@ -169,5 +175,16 @@ public class MainActivity extends AppCompatActivity {
             String msg = (String) getResources().getText(R.string.error_invalid_retrieved_config);
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void createCommunicator() {
+        Ice.InitializationData idata = new Ice.InitializationData();
+        idata.properties = Ice.Util.createProperties();
+
+        _ic = Ice.Util.initialize(idata);
+    }
+
+    private void createIDMRouter(String idm_str_proxy) {
+        _router = _ic.stringToProxy(idm_str_proxy);
     }
 }

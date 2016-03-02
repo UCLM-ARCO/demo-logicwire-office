@@ -25,3 +25,4 @@ build
 gradlew
 gradlew.bat
 *.jar
+src/generated
