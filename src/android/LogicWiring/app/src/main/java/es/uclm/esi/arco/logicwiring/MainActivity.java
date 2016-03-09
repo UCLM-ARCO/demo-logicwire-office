@@ -33,7 +33,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import Ice.ObjectPrx;
 
@@ -45,10 +48,16 @@ class Thing {
 
     public Type type;
     public String addr;
+    public Thing observer;
 
     public Thing(String idm_addr, Type type) {
         this.type = type;
         this.addr = idm_addr;
+        this.observer = null;
+    }
+
+    public void setObserver(Thing observer) {
+        this.observer = observer;
     }
 }
 
@@ -57,12 +66,11 @@ class ThingViewAdapter
         implements AdapterView.OnItemLongClickListener,
         View.OnDragListener {
 
-    public ThingViewAdapter(Context context, int resource) {
-        super(context, resource);
-    }
+    private Map<String, Thing> _things;
 
-    public ThingViewAdapter(Context context, int resource, List<Thing> items) {
-        super(context, resource, items);
+    public ThingViewAdapter(Context context, int resource, Map<String, Thing> things) {
+        super(context, resource);
+        this._things = things;
     }
 
     @Override
@@ -76,6 +84,9 @@ class ThingViewAdapter
         }
 
         Thing t = getItem(position);
+        if (t.observer != null) {
+            System.out.println("object " + t.addr + " has observer");
+        }
 
         if (t != null) {
             TextView tv = (TextView) v.findViewById(R.id.ThingText);
@@ -91,6 +102,7 @@ class ThingViewAdapter
         }
 
         v.setOnDragListener(this);
+        v.setTag(t.addr);
         return v;
     }
 
@@ -101,7 +113,7 @@ class ThingViewAdapter
         ClipData.Item item = new ClipData.Item(t.addr);
         ClipData data = new ClipData(t.addr, new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}, item);
         View.DragShadowBuilder shadow = new View.DragShadowBuilder(view);
-        view.startDrag(data, shadow, null, 0);
+        view.startDrag(data, shadow, t, 0);
 
         return true;
     }
@@ -115,7 +127,21 @@ class ThingViewAdapter
                 return event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN);
 
             case DragEvent.ACTION_DROP:
-                System.out.println("Drop of item!");
+                Thing src = (Thing) event.getLocalState();
+                String dst_addr = (String) v.getTag();
+
+                // drop on same item, discard
+                if (Objects.equals(src.addr, dst_addr))
+                    return false;
+
+                // set dst as observer for src
+                Thing dst = _things.get(dst_addr);
+                src.setObserver(dst);
+
+                // repaint dst view
+                notifyDataSetChanged();
+
+                System.out.println("Drop of item " + src.addr + " on " + dst.addr);
                 return true;
         }
 
@@ -137,6 +163,11 @@ public class MainActivity extends AppCompatActivity {
     private ObjectPrx _router;
     private ThingViewAdapter _receiver_things;
     private ThingViewAdapter _sender_things;
+    private Map<String, Thing> _things;
+
+    public Thing getThing(String addr) {
+        return _things.get(addr);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String idm_str_proxy = sharedPref.getString(PREF_IDM_ROUTER, "");
+        _things = new HashMap<String, Thing>();
 
         if (idm_str_proxy.isEmpty())
             setContentView(R.layout.welcome_activity);
@@ -152,17 +184,26 @@ public class MainActivity extends AppCompatActivity {
             setContentView(R.layout.things_activity);
 
             GridView view;
-            _receiver_things = new ThingViewAdapter(this, R.layout.simple_thing_item);
+            _receiver_things = new ThingViewAdapter(this, R.layout.simple_thing_item, _things);
             view = (GridView) findViewById(R.id.receivers_holder);
             view.setAdapter(_receiver_things);
             view.setOnItemLongClickListener(_receiver_things);
 
-            _sender_things = new ThingViewAdapter(this, R.layout.simple_thing_item);
+            _sender_things = new ThingViewAdapter(this, R.layout.simple_thing_item, _things);
             view = (GridView) findViewById(R.id.senders_holder);
             view.setAdapter(_sender_things);
             view.setOnItemLongClickListener(_sender_things);
 
-            addThing("10:00");
+            // FIXME: just for debug
+            {
+                Thing a = new Thing("10:01", Thing.Type.RECEIVER);
+                _things.put("10:01", a);
+                _receiver_things.add(a);
+
+                Thing b = new Thing("10:11", Thing.Type.SENDER);
+                _things.put("10:11", b);
+                _sender_things.add(b);
+            }
 
 //            createCommunicator();
 //            createIDMRouter(idm_str_proxy);
