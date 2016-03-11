@@ -76,29 +76,25 @@ class ThingViewAdapter
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View v = convertView;
+        Thing t = getItem(position);
 
         if (v == null) {
+            // view is not recycled
             LayoutInflater vi;
             vi = LayoutInflater.from(getContext());
             v = vi.inflate(R.layout.simple_thing_item, null);
         }
 
-        Thing t = getItem(position);
-        if (t.observer != null) {
-            System.out.println("object " + t.addr + " has observer");
-        }
+        TextView tv = (TextView) v.findViewById(R.id.ThingText);
+        if (tv != null) {
+            String content = t.addr + (t.observer != null ? "T" : "F");
+            tv.setText(content);
 
-        if (t != null) {
-            TextView tv = (TextView) v.findViewById(R.id.ThingText);
-            if (tv != null) {
-                tv.setText(t.addr);
+            int icon = R.drawable.ic_wb_incandescent_black_48dp_orange;
+            if (t.type == Thing.Type.SENDER)
+                icon = R.drawable.ic_touch_app_black_48dp_blue;
 
-                int icon = R.drawable.ic_wb_incandescent_black_48dp_orange;
-                if (t.type == Thing.Type.SENDER)
-                    icon = R.drawable.ic_touch_app_black_48dp_blue;
-
-                tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, icon, 0, 0);
-            }
+            tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, icon, 0, 0);
         }
 
         v.setOnDragListener(this);
@@ -123,10 +119,11 @@ class ThingViewAdapter
         final int action = event.getAction();
 
         switch (action) {
-            case DragEvent.ACTION_DRAG_STARTED:
+            case DragEvent.ACTION_DRAG_STARTED: {
                 return event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN);
+            }
 
-            case DragEvent.ACTION_DROP:
+            case DragEvent.ACTION_DROP: {
                 Thing src = (Thing) event.getLocalState();
                 String dst_addr = (String) v.getTag();
 
@@ -138,11 +135,26 @@ class ThingViewAdapter
                 Thing dst = _things.get(dst_addr);
                 src.setObserver(dst);
 
-                // repaint dst view
-                notifyDataSetChanged();
+                // we need to:
+                //  - redraw dst view
+                //  - remove src view
+                // notifyDataSetChanged();
+                ((MainActivity) getContext()).onChanged();
 
                 System.out.println("Drop of item " + src.addr + " on " + dst.addr);
                 return true;
+            }
+
+            case DragEvent.ACTION_DRAG_ENDED: {
+                Thing src = (Thing) event.getLocalState();
+                String my_addr = (String) v.getTag();
+                if (!Objects.equals(src.addr, my_addr))
+                    return false;
+
+                System.out.println("THIS IS THE SOURCE: " + event.getResult());
+                remove(src);
+                return true;
+            }
         }
 
         return false;
@@ -167,6 +179,11 @@ public class MainActivity extends AppCompatActivity {
 
     public Thing getThing(String addr) {
         return _things.get(addr);
+    }
+
+    public void onChanged() {
+        _receiver_things.notifyDataSetChanged();
+        _sender_things.notifyDataSetChanged();
     }
 
     @Override
