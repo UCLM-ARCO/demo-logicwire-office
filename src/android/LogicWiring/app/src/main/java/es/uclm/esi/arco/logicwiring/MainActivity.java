@@ -15,7 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
-import android.widget.GridView;
 import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -150,32 +149,39 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
 
     private Thing _thing;
     private View _view;
-    private ViewGroup _parent;
 
     public ThingView(Context context, ViewGroup parent, Thing thing) {
         _thing = thing;
-        _parent = parent;
 
         // load card from XML layout
         LayoutInflater vi;
         vi = LayoutInflater.from(context);
-        _view = vi.inflate(R.layout.simple_thing_item, null);
-        _parent.addView(_view);
+        _view = vi.inflate(R.layout.linked_thing_item, null);
+        parent.addView(_view);
 
         updateContent();
     }
 
     private void updateContent() {
         // set ADDR for text
-        TextView tv = (TextView) _view.findViewById(R.id.ThingText);
+        TextView tv = (TextView) _view.findViewById(R.id.SrcThingText);
 
         String content = _thing.addr;
         if (_thing.observable != null) {
-            content += "+";
-
             GridLayout.LayoutParams lp = (GridLayout.LayoutParams) _view.getLayoutParams();
             lp.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 2);
             _view.setLayoutParams(lp);
+
+            View addon = _view.findViewById(R.id.LinkedThingHolder);
+            addon.setVisibility(View.VISIBLE);
+
+            TextView dst_tv = (TextView) _view.findViewById(R.id.DstThingText);
+            dst_tv.setText(_thing.observable.addr);
+
+            int dst_icon = R.drawable.ic_wb_incandescent_black_48dp_orange;
+            if (_thing.observable.type == Thing.Type.SENDER)
+                dst_icon = R.drawable.ic_touch_app_black_48dp_blue;
+            dst_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, dst_icon, 0, 0);
         }
         tv.setText(content);
 
@@ -188,8 +194,7 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
         // connect callbacks
         if (_thing.type == Thing.Type.SENDER)
             tv.setOnLongClickListener(this);
-        if (_thing.type == Thing.Type.RECEIVER)
-            tv.setOnDragListener(this);
+        tv.setOnDragListener(this);
     }
 
     @Override
@@ -207,7 +212,8 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
 
         switch (action) {
             case DragEvent.ACTION_DRAG_STARTED: {
-                return event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN);
+                return event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) &&
+                        _thing.type == Thing.Type.RECEIVER;
             }
 
             case DragEvent.ACTION_DROP: {
@@ -223,19 +229,18 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
                 }
 
                 // set dst as observable for src and update views
-                System.out.println("Drop of item " + src.addr + " on " + _thing.addr);
                 _thing.setObservable(src);
                 updateContent();
-
                 return true;
             }
 
             case DragEvent.ACTION_DRAG_ENDED: {
-                Thing src = (Thing) event.getLocalState();
-                if (!Objects.equals(src.addr, _thing.addr))
-                    return false;
+                if (event.getResult()) {
+                    Thing src = (Thing) event.getLocalState();
+                    if (Objects.equals(src.addr, _thing.addr))
+                        _view.setAlpha((float) 0.5);
+                }
 
-//                remove(src);
                 return true;
             }
         }
