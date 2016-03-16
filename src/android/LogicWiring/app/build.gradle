@@ -5,7 +5,10 @@ slice {
     java {
         // add a new file() for each .ice (even those included inside others .ice)
         files = [file("/usr/share/slice/duo/duo_idm.ice"),
-                 file("/usr/share/slice/idm/idm.ice")]
+                 file("/usr/share/slice/idm/idm.ice"),
+                 file("/usr/share/slice/thing/thing.ice"),
+                 file("src/main/slice/PropertyService.ice")
+        ]
 
         // search path for includes
         args = "-I/usr/share/slice"

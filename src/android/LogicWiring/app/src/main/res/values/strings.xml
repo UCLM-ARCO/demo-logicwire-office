@@ -15,4 +15,5 @@
     <string name="section_receiver">Receivers:</string>
     <string name="action_add">Add new Thing</string>
     <string name="error_repeated_addr">Already added Thing</string>
+    <string name="ps_unreachable">Could not reach Property Server!</string>
 </resources>

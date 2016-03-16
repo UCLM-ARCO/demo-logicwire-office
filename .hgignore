@@ -4,6 +4,7 @@ syntax: glob
 *.o
 *.pyc
 *.bin
+*.db
 
 *bak
 *bck
@@ -13,7 +14,6 @@ syntax: glob
 src/*/node/config.h
 src/*/node/iot.h
 *.table
-
 
 .gitignore
 .gradle

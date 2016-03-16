@@ -1,0 +1,1 @@
+../../../../../../../../ice.property-service-simple/PropertyService/PropertyService.ice

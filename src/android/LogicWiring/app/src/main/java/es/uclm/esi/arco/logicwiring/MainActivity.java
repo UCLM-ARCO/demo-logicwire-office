@@ -32,11 +32,14 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import Ice.ObjectPrx;
+import PropertyService.PropertyServerPrx;
+import PropertyService.PropertyServerPrxHelper;
 
-class Thing {
+class ThingObject {
     public enum Type {
         SENDER,
         RECEIVER
@@ -44,26 +47,26 @@ class Thing {
 
     public Type type;
     public String addr;
-    public Thing observable;
+    public ThingObject observable;
 
-    public Thing(String idm_addr, Type type) {
+    public ThingObject(String idm_addr, Type type) {
         this.type = type;
         this.addr = idm_addr;
         this.observable = null;
     }
 
-    public void setObservable(Thing observable) {
+    public void setObservable(ThingObject observable) {
         this.observable = observable;
     }
 }
 
 class ThingView implements View.OnLongClickListener, View.OnDragListener {
 
-    private Thing _thing;
+    private ThingObject _thingObject;
     private View _view;
 
-    public ThingView(Context context, ViewGroup parent, Thing thing) {
-        _thing = thing;
+    public ThingView(Context context, ViewGroup parent, ThingObject thingObject) {
+        _thingObject = thingObject;
 
         // load card from XML layout
         LayoutInflater vi;
@@ -78,8 +81,8 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
         // set ADDR for text
         TextView tv = (TextView) _view.findViewById(R.id.SrcThingText);
 
-        String content = _thing.addr;
-        if (_thing.observable != null) {
+        String content = _thingObject.addr;
+        if (_thingObject.observable != null) {
             GridLayout.LayoutParams lp = (GridLayout.LayoutParams) _view.getLayoutParams();
             lp.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 2);
             _view.setLayoutParams(lp);
@@ -88,10 +91,10 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
             addon.setVisibility(View.VISIBLE);
 
             TextView dst_tv = (TextView) _view.findViewById(R.id.DstThingText);
-            dst_tv.setText(_thing.observable.addr);
+            dst_tv.setText(_thingObject.observable.addr);
 
             int dst_icon = R.drawable.ic_wb_incandescent_black_48dp_orange;
-            if (_thing.observable.type == Thing.Type.SENDER)
+            if (_thingObject.observable.type == ThingObject.Type.SENDER)
                 dst_icon = R.drawable.ic_touch_app_black_48dp_blue;
             dst_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, dst_icon, 0, 0);
         }
@@ -99,22 +102,22 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
 
         // set icon by TYPE
         int icon = R.drawable.ic_wb_incandescent_black_48dp_orange;
-        if (_thing.type == Thing.Type.SENDER)
+        if (_thingObject.type == ThingObject.Type.SENDER)
             icon = R.drawable.ic_touch_app_black_48dp_blue;
         tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, icon, 0, 0);
 
         // connect callbacks
-        if (_thing.type == Thing.Type.SENDER)
+        if (_thingObject.type == ThingObject.Type.SENDER)
             tv.setOnLongClickListener(this);
         tv.setOnDragListener(this);
     }
 
     @Override
     public boolean onLongClick(View v) {
-        ClipData.Item item = new ClipData.Item(_thing.addr);
-        ClipData data = new ClipData(_thing.addr, new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}, item);
+        ClipData.Item item = new ClipData.Item(_thingObject.addr);
+        ClipData data = new ClipData(_thingObject.addr, new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}, item);
         View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
-        v.startDrag(data, shadow, _thing, 0);
+        v.startDrag(data, shadow, _thingObject, 0);
         return true;
     }
 
@@ -125,31 +128,31 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
         switch (action) {
             case DragEvent.ACTION_DRAG_STARTED: {
                 return event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) &&
-                        _thing.type == Thing.Type.RECEIVER;
+                        _thingObject.type == ThingObject.Type.RECEIVER;
             }
 
             case DragEvent.ACTION_DROP: {
                 // drop on non RECEIVER, discard
-                if (_thing.type != Thing.Type.RECEIVER)
+                if (_thingObject.type != ThingObject.Type.RECEIVER)
                     return false;
 
-                Thing src = (Thing) event.getLocalState();
+                ThingObject src = (ThingObject) event.getLocalState();
 
                 // drop on same item, discard
-                if (Objects.equals(src.addr, _thing.addr)) {
+                if (Objects.equals(src.addr, _thingObject.addr)) {
                     return false;
                 }
 
                 // set dst as observable for src and update views
-                _thing.setObservable(src);
+                _thingObject.setObservable(src);
                 updateContent();
                 return true;
             }
 
             case DragEvent.ACTION_DRAG_ENDED: {
                 if (event.getResult()) {
-                    Thing src = (Thing) event.getLocalState();
-                    if (Objects.equals(src.addr, _thing.addr))
+                    ThingObject src = (ThingObject) event.getLocalState();
+                    if (Objects.equals(src.addr, _thingObject.addr))
                         _view.setAlpha((float) 0.5);
                 }
 
@@ -163,17 +166,20 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String PREF_PROPERTY_SERVER = "pref_property_server";
+    private static final String PREF_IDM_ROUTER = "pref_idm_router";
+
     enum Action {
         NONE,
         FETCH_CONFIG,
         ADD_THING,
     }
 
-    private final static String PREF_IDM_ROUTER = "pref_idm_router";
     private Action _current_action = Action.NONE;
-    private HashMap<String, Thing> _things;
+    private HashMap<String, ThingObject> _things;
     private Ice.Communicator _ic;
     private ObjectPrx _router;
+    private PropertyServerPrx _ps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -190,7 +196,10 @@ public class MainActivity extends AppCompatActivity {
             setContentView(R.layout.things_activity);
 
             createCommunicator();
-            createIDMRouter(idm_str_proxy);
+            createProxies();
+
+            // DEBUG
+            addThingFromQR("10:00");
         }
     }
 
@@ -238,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
         String content = result.getContents();
         switch (_current_action) {
             case ADD_THING:
-                addThing(content);
+                addThingFromQR(content);
                 break;
 
             case FETCH_CONFIG:
@@ -247,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void addThing(String addr) {
+    private void addThingFromQR(String addr) {
         if (addr.startsWith("http://")) {
             Toast.makeText(this, getResources().getText(R.string.error_invalid_addr)
                     + ": " + addr, Toast.LENGTH_LONG).show();
@@ -260,8 +269,20 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // contact with PS to retrieve this object's properties
+        System.out.println("Retrieving properties from PS server...");
+        Map<String, Thing.T> props = _ps.slice(new String[][] {});
+        for (String a : props.keySet()) {
+            System.out.println(a);
+        }
+
+        // if object has children, it is a node address
+        //  - add each one of its childrens
+        // else, add it
+
         GridLayout holder = (GridLayout) findViewById(R.id.receivers_holder);
-        Thing t = new Thing(addr, Thing.Type.RECEIVER);
+        ThingObject t = new ThingObject(addr, ThingObject.Type.RECEIVER);
+        _things.put(addr, t);
         new ThingView(this, holder, t);
     }
 
@@ -318,10 +339,11 @@ public class MainActivity extends AppCompatActivity {
     protected void parseJSONConfig(String json) {
         try {
             JSONObject jObject = new JSONObject(json);
-
-            String router = jObject.getString("IDMRouter");
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-            sharedPref.edit().putString(PREF_IDM_ROUTER, router).apply();
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .edit()
+                    .putString(PREF_IDM_ROUTER, jObject.getString("IDMRouter"))
+                    .putString(PREF_PROPERTY_SERVER, jObject.getString("PropertyServer"))
+                    .apply();
 
             // restart activity
             finish();
@@ -340,7 +362,17 @@ public class MainActivity extends AppCompatActivity {
         _ic = Ice.Util.initialize(idata);
     }
 
-    private void createIDMRouter(String idm_str_proxy) {
+    private void createProxies() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String idm_str_proxy = sharedPref.getString(PREF_IDM_ROUTER, "");
         _router = _ic.stringToProxy(idm_str_proxy);
+
+        String ps_str_proxy = sharedPref.getString(PREF_PROPERTY_SERVER, "");
+        ObjectPrx prx = _ic.stringToProxy(ps_str_proxy);
+        try {
+            _ps = PropertyServerPrxHelper.checkedCast(prx);
+        } catch (Ice.Exception e) {
+            Toast.makeText(this, getString(R.string.ps_unreachable), Toast.LENGTH_LONG).show();
+        }
     }
 }
