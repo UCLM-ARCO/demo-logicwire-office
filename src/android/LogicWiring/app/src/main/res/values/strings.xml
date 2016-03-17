@@ -16,4 +16,5 @@
     <string name="action_add">Add new Thing</string>
     <string name="error_repeated_addr">Already added Thing</string>
     <string name="ps_unreachable">Could not reach Property Server!</string>
+    <string name="unable_to_get_properties">Unable to get properties for </string>
 </resources>

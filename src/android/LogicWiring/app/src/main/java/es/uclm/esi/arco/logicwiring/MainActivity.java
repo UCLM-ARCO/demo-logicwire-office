@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import Ice.ObjectPrx;
+import PropertyService.PropertyException;
 import PropertyService.PropertyServerPrx;
 import PropertyService.PropertyServerPrxHelper;
 
@@ -257,6 +259,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addThingFromQR(String addr) {
+        if (_ps == null) {
+            Toast.makeText(this, getString(R.string.ps_unreachable), Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (addr.startsWith("http://")) {
             Toast.makeText(this, getResources().getText(R.string.error_invalid_addr)
                     + ": " + addr, Toast.LENGTH_LONG).show();
@@ -271,9 +278,20 @@ public class MainActivity extends AppCompatActivity {
 
         // contact with PS to retrieve this object's properties
         System.out.println("Retrieving properties from PS server...");
-        Map<String, Thing.T> props = _ps.slice(new String[][] {});
-        for (String a : props.keySet()) {
-            System.out.println(a);
+        JSONObject props = getProperties(addr);
+        if (props == null)
+            return;
+
+        // get its children, if any
+        JSONArray children = null;
+        try { children = props.getJSONArray("children");
+        } catch (JSONException e) {
+            System.out.println("Info: '" + addr + "' is an object (has no children)");
+            e.printStackTrace();
+        }
+
+        if (children != null) {
+            System.out.println("node has children!");
         }
 
         // if object has children, it is a node address
@@ -284,6 +302,19 @@ public class MainActivity extends AppCompatActivity {
         ThingObject t = new ThingObject(addr, ThingObject.Type.RECEIVER);
         _things.put(addr, t);
         new ThingView(this, holder, t);
+    }
+
+    JSONObject getProperties(String addr) {
+        try {
+            String str_props = _ps.getJSON(addr);
+            System.out.println("GOT: '" + str_props + "'");
+            return new JSONObject(str_props);
+        } catch (JSONException | PropertyException e) {
+            Toast.makeText(this, getString(R.string.unable_to_get_properties)
+                    + ": " + addr, Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private class RetrieveJSONConfig extends AsyncTask<String, Void, Void> {
