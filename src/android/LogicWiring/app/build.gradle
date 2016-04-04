@@ -7,7 +7,7 @@ slice {
         files = [file("/usr/share/slice/duo/duo_idm.ice"),
                  file("/usr/share/slice/idm/idm.ice"),
                  file("/usr/share/slice/thing/thing.ice"),
-                 file("src/main/slice/PropertyService.ice")
+                 file("/usr/share/slice/PropertyService/PropertyService.ice")
         ]
 
         // search path for includes

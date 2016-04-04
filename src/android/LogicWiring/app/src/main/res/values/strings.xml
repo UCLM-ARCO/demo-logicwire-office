@@ -17,4 +17,7 @@
     <string name="error_repeated_addr">Already added Thing</string>
     <string name="ps_unreachable">Could not reach Property Server!</string>
     <string name="unable_to_get_properties">Unable to get properties for </string>
+    <string name="ps_invalid_proxy">Invalid proxy</string>
+    <string name="error_while_parsing_response">Error while parsing response from server!</string>
+    <string name="error_with_properties">There were an error retrieving properties!</string>
 </resources>

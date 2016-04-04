@@ -32,8 +32,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import Ice.ObjectPrx;
@@ -49,16 +49,59 @@ class ThingObject {
 
     public Type type;
     public String addr;
+    public String name;
+    public Integer icon;
     public ThingObject observable;
 
-    public ThingObject(String idm_addr, Type type) {
+    private ObjectPrx _router;
+
+    public ThingObject(String idm_addr, Type type, JSONObject props, ObjectPrx router) throws JSONException {
         this.type = type;
         this.addr = idm_addr;
         this.observable = null;
+        this._router = router;
+
+        // set icon
+        HashMap<String, Integer> icons = new HashMap<>();
+        icons.put("touch", R.drawable.ic_touch_app_black_48dp_blue);
+        icons.put("bulb", R.drawable.ic_wb_incandescent_black_48dp_orange);
+        icons.put("radio", R.drawable.ic_radio_button_checked_black_24dp_green);
+
+        String icon_name = "touch";
+        if (props.has("icon"))
+            icon_name = props.getString("icon");
+        else if (this.type == Type.RECEIVER)
+            icon_name = "bulb";
+
+        this.icon = icons.get(icon_name);
+        if (this.icon == null)
+            this.icon = R.drawable.ic_touch_app_black_48dp_blue;
+
+        // set name
+        this.name = idm_addr;
+        if (props.has("name"))
+            this.name = props.getString("name");
     }
 
     public void setObservable(ThingObject observable) {
         this.observable = observable;
+
+        // get router's proxy with observable.addr
+        Ice.Identity dst_id = _router.ice_getCommunicator().stringToIdentity(this.addr);
+        ObjectPrx prx = _router.ice_identity(dst_id);
+        DUO.IDM.Active.WPrx dst = DUO.IDM.Active.WPrxHelper.uncheckedCast(prx);
+
+        // call to setObserver with this.addr
+        dst.begin_setObserver(stringToIdmAddress(this.addr));
+    }
+
+    private byte[] stringToIdmAddress(String addr) {
+        String[] fields = addr.split(":");
+        byte[] retval = new byte[fields.length];
+
+        for (int i=0; i<fields.length; i++)
+            retval[i] = Byte.parseByte(fields[i]);
+        return retval;
     }
 }
 
@@ -80,10 +123,12 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
     }
 
     private void updateContent() {
-        // set ADDR for text
+        // setup card
         TextView tv = (TextView) _view.findViewById(R.id.SrcThingText);
+        tv.setText(_thingObject.name);
+        tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, _thingObject.icon, 0, 0);
 
-        String content = _thingObject.addr;
+        // append linked view (if any)
         if (_thingObject.observable != null) {
             GridLayout.LayoutParams lp = (GridLayout.LayoutParams) _view.getLayoutParams();
             lp.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 2);
@@ -93,20 +138,9 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
             addon.setVisibility(View.VISIBLE);
 
             TextView dst_tv = (TextView) _view.findViewById(R.id.DstThingText);
-            dst_tv.setText(_thingObject.observable.addr);
-
-            int dst_icon = R.drawable.ic_wb_incandescent_black_48dp_orange;
-            if (_thingObject.observable.type == ThingObject.Type.SENDER)
-                dst_icon = R.drawable.ic_touch_app_black_48dp_blue;
-            dst_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, dst_icon, 0, 0);
+            dst_tv.setText(_thingObject.observable.name);
+            dst_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, _thingObject.observable.icon, 0, 0);
         }
-        tv.setText(content);
-
-        // set icon by TYPE
-        int icon = R.drawable.ic_wb_incandescent_black_48dp_orange;
-        if (_thingObject.type == ThingObject.Type.SENDER)
-            icon = R.drawable.ic_touch_app_black_48dp_blue;
-        tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, icon, 0, 0);
 
         // connect callbacks
         if (_thingObject.type == ThingObject.Type.SENDER)
@@ -147,7 +181,11 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
 
                 // set dst as observable for src and update views
                 _thingObject.setObservable(src);
+                Toast.makeText(v.getContext(), "Setting " + _thingObject.name + " as observer of " + src.name,
+                        Toast.LENGTH_LONG).show();
+                System.out.println("call " + _thingObject.name + ".setObserver(" + src.name + ")");
                 updateContent();
+
                 return true;
             }
 
@@ -201,7 +239,12 @@ public class MainActivity extends AppCompatActivity {
             createProxies();
 
             // DEBUG
-            addThingFromQR("10:00");
+            try {
+                addThingFromQR("10:00");
+            } catch (JSONException e) {
+                Toast.makeText(this, "Error: " + e.toString(), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
         }
     }
 
@@ -218,6 +261,10 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_add:
                 _current_action = Action.ADD_THING;
                 getQRScannerIntentIntegrator().initiateScan();
+                return true;
+
+            case R.id.action_settings:
+                onStartClicked(null);
                 return true;
 
             default:
@@ -249,7 +296,13 @@ public class MainActivity extends AppCompatActivity {
         String content = result.getContents();
         switch (_current_action) {
             case ADD_THING:
-                addThingFromQR(content);
+                try {
+                    addThingFromQR(content);
+                } catch (JSONException e) {
+                    Toast.makeText(this, getString(R.string.error_with_properties),
+                            Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
                 break;
 
             case FETCH_CONFIG:
@@ -258,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void addThingFromQR(String addr) {
+    private void addThingFromQR(String addr) throws JSONException {
         if (_ps == null) {
             Toast.makeText(this, getString(R.string.ps_unreachable), Toast.LENGTH_LONG).show();
             return;
@@ -282,32 +335,72 @@ public class MainActivity extends AppCompatActivity {
         if (props == null)
             return;
 
-        // get its children, if any
-        JSONArray children = null;
-        try { children = props.getJSONArray("children");
-        } catch (JSONException e) {
-            System.out.println("Info: '" + addr + "' is an object (has no children)");
-            e.printStackTrace();
+        // if there is no children, its an object
+        if (! props.has("children")) {
+            System.out.println("Given addr is an object, adding it...");
+            addThingWithProps(addr, props);
+            return;
         }
 
-        if (children != null) {
-            System.out.println("node has children!");
+        // otherwise is a node, add each one of its children
+        System.out.println("Given addr is a node, with children: " + props.getJSONArray("children").toString());
+        JSONArray children = props.getJSONArray("children");
+        JSONObject child_props = getChildrenProperties(children);
+        if (child_props == null)
+            return;
+
+        for (int i=0; i<children.length(); i++) {
+            String child = children.getString(i);
+            if (! child_props.has(child)) {
+                System.out.println("Missing properties for '" + child + "'");
+                continue;
+            }
+
+            JSONObject iprops = child_props.getJSONObject(child);
+            addThingWithProps(child, iprops);
+        }
+    }
+
+    private void addThingWithProps(String addr, JSONObject props) throws JSONException {
+        if (! props.has("tags")) {
+            System.out.println("Invalid thing: missing 'tags' property");
+            return;
         }
 
-        // if object has children, it is a node address
-        //  - add each one of its childrens
-        // else, add it
+        int holder_id;
+        ThingObject.Type type;
 
-        GridLayout holder = (GridLayout) findViewById(R.id.receivers_holder);
-        ThingObject t = new ThingObject(addr, ThingObject.Type.RECEIVER);
+        ArrayList<String> tags = JSONArrayToList(props.getJSONArray("tags"));
+        if (tags.contains("consumer")) {
+            holder_id = R.id.receivers_holder;
+            type = ThingObject.Type.RECEIVER;
+        }
+        else  if (tags.contains("producer")){
+            holder_id = R.id.senders_holder;
+            type = ThingObject.Type.SENDER;
+        }
+        else {
+            System.out.println("Object " + addr + " is neither 'producer' or 'consumer', ignoring it...");
+            return;
+        }
+
+        System.out.println("Adding " + addr + " as " + type.toString());
+        GridLayout holder = (GridLayout) findViewById(holder_id);
+        ThingObject t = new ThingObject(addr, type, props, _router);
         _things.put(addr, t);
         new ThingView(this, holder, t);
     }
 
-    JSONObject getProperties(String addr) {
+    private ArrayList<String> JSONArrayToList(JSONArray tags) throws JSONException {
+        ArrayList<String> result = new ArrayList<>();
+        for (int i=0; i<tags.length(); i++)
+            result.add(tags.getString(i));
+        return result;
+    }
+
+    private JSONObject getProperties(String addr) {
         try {
             String str_props = _ps.getJSON(addr);
-            System.out.println("GOT: '" + str_props + "'");
             return new JSONObject(str_props);
         } catch (JSONException | PropertyException e) {
             Toast.makeText(this, getString(R.string.unable_to_get_properties)
@@ -315,6 +408,15 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private JSONObject getChildrenProperties(JSONArray children) throws JSONException {
+        String[] paths = new String[children.length()];
+        for (int i=0; i<children.length(); i++) {
+            paths[i] = children.getString(i);
+        }
+        String str_props = _ps.sliceJSON(paths);
+        return new JSONObject(str_props);
     }
 
     private class RetrieveJSONConfig extends AsyncTask<String, Void, Void> {
@@ -396,7 +498,12 @@ public class MainActivity extends AppCompatActivity {
     private void createProxies() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String idm_str_proxy = sharedPref.getString(PREF_IDM_ROUTER, "");
-        _router = _ic.stringToProxy(idm_str_proxy);
+        try {
+            _router = _ic.stringToProxy(idm_str_proxy);
+        } catch (Ice.Exception e) {
+            Toast.makeText(this, getString(R.string.ps_invalid_proxy) + ":" + idm_str_proxy,
+                    Toast.LENGTH_LONG).show();
+        }
 
         String ps_str_proxy = sharedPref.getString(PREF_PROPERTY_SERVER, "");
         ObjectPrx prx = _ic.stringToProxy(ps_str_proxy);

@@ -20,7 +20,9 @@
             android:drawablePadding="10dp"
             android:gravity="center_vertical|center_horizontal"
             android:bufferType="spannable"
-            android:padding="5dp" />
+            android:padding="5dp"
+            android:focusableInTouchMode="false"
+            android:ellipsize="end" />
 
         <LinearLayout
             android:orientation="horizontal"

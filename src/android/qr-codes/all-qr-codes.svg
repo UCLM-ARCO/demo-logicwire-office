@@ -20,8 +20,6 @@
    inkscape:export-filename="/home/oscar/repos/demo.logicwire-office/src/android/qr-codes/all-qr-codes.svg.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
-  <defs
-     id="defs4" />
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -30,16 +28,18 @@
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="1.1436136"
-     inkscape:cx="128.83177"
-     inkscape:cy="740.48802"
+     inkscape:cx="342.19055"
+     inkscape:cy="738.73918"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="960"
+     inkscape:window-width="1920"
      inkscape:window-height="1043"
-     inkscape:window-x="1920"
+     inkscape:window-x="0"
      inkscape:window-y="0"
-     inkscape:window-maximized="0" />
+     inkscape:window-maximized="1" />
+  <defs
+     id="defs4" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -53,130 +53,145 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Capa 1"
+     id="layer1"
      inkscape:groupmode="layer"
-     id="layer1">
+     inkscape:label="Capa 1">
     <image
-       y="51.375927"
-       x="225.15204"
+       width="105"
+       height="105"
+       preserveAspectRatio="none"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABUAQMAAAAmpYKCAAAABlBMVEUAAAD///+l2Z/dAAAAAnRS TlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAACISURBVCiRldPREcAgCAPQbMD+W2YDmojX 9s/ojw/vuIJYAKiu8obE1ZKWtswQYOR2+o2BC0+Bb50nu+n63cPJrVW9VmRQsStEZuWxqIPp5eg1 OU6YmMrd3UfWl7AihnbvxfWeEmMPTmFkD437XiNj0m5camgOMjf5vduT/eg0Cl1C5Pkp6YYSP+sd ZqjNU0B9AAAAAElFTkSuQmCC "
        id="image3370"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABUAQMAAAAmpYKCAAAABlBMVEUAAAD///+l2Z/dAAAAAnRS
-TlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAACISURBVCiRldPREcAgCAPQbMD+W2YDmojX
-9s/ojw/vuIJYAKiu8obE1ZKWtswQYOR2+o2BC0+Bb50nu+n63cPJrVW9VmRQsStEZuWxqIPp5eg1
-OU6YmMrd3UfWl7AihnbvxfWeEmMPTmFkD437XiNj0m5camgOMjf5vduT/eg0Cl1C5Pkp6YYSP+sd
-ZqjNU0B9AAAAAElFTkSuQmCC
-"
-       preserveAspectRatio="none"
-       height="105"
-       width="105" />
+       x="225.15204"
+       y="51.375927" />
     <image
-       y="51.375927"
-       x="36.361637"
+       width="105"
+       height="105"
+       preserveAspectRatio="none"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABUAQMAAAAmpYKCAAAABlBMVEUAAAD///+l2Z/dAAAAAnRS TlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAACHSURBVCiRldLRDQAhCAPQbtD9t+wGXBHv cn9Wf3yYEBEBABbZGxKzLC9vmWGgkbvTbwxceAr86jy5H81fH04uL9ZakSHHXSFii/JB3xe45BAT JpaL8ubfyNyFOY9Q5vV2as1TYuyPcxi5P02cnkXGpN3YDdsHmbu37xwePU+XmxB5hs7NVeQHXNlk yJeGXSQAAAAASUVORK5CYII= "
        id="image3359"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABUAQMAAAAmpYKCAAAABlBMVEUAAAD///+l2Z/dAAAAAnRS
-TlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAACHSURBVCiRldLRDQAhCAPQbtD9t+wGXBHv
-cn9Wf3yYEBEBABbZGxKzLC9vmWGgkbvTbwxceAr86jy5H81fH04uL9ZakSHHXSFii/JB3xe45BAT
-JpaL8ubfyNyFOY9Q5vV2as1TYuyPcxi5P02cnkXGpN3YDdsHmbu37xwePU+XmxB5hs7NVeQHXNlk
-yJeGXSQAAAAASUVORK5CYII=
-"
-       preserveAspectRatio="none"
-       height="105"
-       width="105" />
+       x="36.361637"
+       y="51.375927" />
     <image
-       y="51.375927"
-       x="413.94244"
-       id="image3537"
+       width="105"
+       height="105"
+       preserveAspectRatio="none"
        xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABUAQMAAAAmpYKCAAAABlBMVEUAAAD///+l2Z/dAAAAAnRS TlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAACFSURBVCiRldLRDQAhCAPQbsD+W3YDroXE 3J/VHx8mREQAoLrKGxJXS1raMkOAkdvpLwYevAWeOm/2o+vXh5tbq3pWZFCxK0RmogjqQPclBpVH lsPEqoyYbqW21Cim9s9x5inxNrgcRvanKXN6Fhmb9mJHe5CZ5JnDq2fo1N/uyDt01IMif34XRshG OWPyAAAAAElFTkSuQmCC "
-       preserveAspectRatio="none"
-       height="105"
-       width="105" />
+       id="image3537"
+       x="413.94244"
+       y="51.375927" />
     <image
-       y="53.849163"
-       x="602.73285"
-       id="image3548"
+       width="105"
+       height="105"
+       preserveAspectRatio="none"
        xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABUAQMAAAAmpYKCAAAABlBMVEUAAAD///+l2Z/dAAAAAnRS TlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAACKSURBVCiRldPREcAgCAPQbJD9t2QDmqDt 9c/Ij8/etQJSAGCTXpCYLSm0ZIYAI7dfvzFw4ZXgl+fJLpq/PpzcCvZEZJT2zhCZlVKXH6yOHc0u yixvE9M76BuZseXjEq/aa+YpMfbFsTL70so5Tl2BPUszGbl90JwV2r195/DoGboZvsjrp5wmJ34A FJVBKIb6ENoAAAAASUVORK5CYII= "
-       preserveAspectRatio="none"
-       height="105"
-       width="105" />
+       id="image3548"
+       x="602.73285"
+       y="53.849163" />
     <image
-       y="273.2486"
-       x="86.519196"
-       id="image3559"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGMAAABjAQMAAAC19SzWAAAABlBMVEUAAAD///+l2Z/dAAAAAnRS TlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAErSURBVDiNtdSxcYUwDAZgcS7c4QV85zXc eSVYAB4LwErutAZ3LPDoKHwoP0lekgYrRcLRfIUP+ZcEyc+H/kaFKEyZhkRkFY3ih2iEg7CizvpG vGPf6AqTmDP9RvgC4agq1OKyedivym5F5HvG+7rtrZBUcRwe9pXgrUqbzP6eWZcUOS599v0RFlY0 MpLwbZRHUtTZFUkMaSVFMicjR2kpzLauQlEmltNuu9QlO/vhyiM8raJnXJsDmfk21YU+XB1YMoqq C4Vss0Vm5uptTZiCIFkm2WZblwhvC0YgmVNRGSJmyo+ZeqnrmpceHbNoSF3XDI6M2v2QFKHqM5ae P87VhK3a8+oyjawKu1LaSKOoClhTShhbRdi/7hoZ+qz6XrgflsB93/ZO//BXfAOqTfI2700u2gAA AABJRU5ErkJggg== "
-       preserveAspectRatio="none"
+       width="123.75"
        height="123.75"
-       width="123.75" />
+       preserveAspectRatio="none"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGMAAABjAQMAAAC19SzWAAAABlBMVEUAAAD///+l2Z/dAAAAAnRS TlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAErSURBVDiNtdSxcYUwDAZgcS7c4QV85zXc eSVYAB4LwErutAZ3LPDoKHwoP0lekgYrRcLRfIUP+ZcEyc+H/kaFKEyZhkRkFY3ih2iEg7CizvpG vGPf6AqTmDP9RvgC4agq1OKyedivym5F5HvG+7rtrZBUcRwe9pXgrUqbzP6eWZcUOS599v0RFlY0 MpLwbZRHUtTZFUkMaSVFMicjR2kpzLauQlEmltNuu9QlO/vhyiM8raJnXJsDmfk21YU+XB1YMoqq C4Vss0Vm5uptTZiCIFkm2WZblwhvC0YgmVNRGSJmyo+ZeqnrmpceHbNoSF3XDI6M2v2QFKHqM5ae P87VhK3a8+oyjawKu1LaSKOoClhTShhbRdi/7hoZ+qz6XrgflsB93/ZO//BXfAOqTfI2700u2gAA AABJRU5ErkJggg== "
+       id="image3559"
+       x="86.519196"
+       y="273.2486" />
     <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="63.243961"
-       y="192.91246"
+       sodipodi:linespacing="125%"
        id="text3562"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3564"
-         x="63.243961"
-         y="192.91246">10:00</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="252.03436"
        y="192.91246"
-       id="text3566"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         x="252.03436"
+       x="63.243961"
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
          y="192.91246"
-         id="tspan3570">10:10</tspan></text>
+         x="63.243961"
+         id="tspan3564"
+         sodipodi:role="line">10:00</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="440.82477"
+       sodipodi:linespacing="125%"
+       id="text3566"
        y="192.91246"
+       x="252.03436"
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         id="tspan3570"
+         y="192.91246"
+         x="252.03436"
+         sodipodi:role="line">10:10</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
        id="text3574"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3576"
-         x="440.82477"
-         y="192.91246">10:20</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="629.60236"
        y="192.91246"
+       x="440.82477"
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="192.91246"
+         x="440.82477"
+         id="tspan3576"
+         sodipodi:role="line">10:20</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
        id="text3578"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3580"
+       y="192.91246"
+       x="629.60236"
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="192.91246"
          x="629.60236"
-         y="192.91246">AA:00</tspan></text>
+         id="tspan3580"
+         sodipodi:role="line">AA:00</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="23.495749"
-       y="435.28964"
+       sodipodi:linespacing="125%"
        id="text3582"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3584"
+       y="435.28964"
+       x="23.495749"
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="435.28964"
          x="23.495749"
-         y="435.28964" /></text>
+         id="tspan3584"
+         sodipodi:role="line" /></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3586"
+       y="424.1601"
+       x="148.24405"
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-size:15px;text-align:center;text-anchor:middle"
+         y="424.1601"
+         x="148.24405"
+         id="tspan3588"
+         sodipodi:role="line">http://arco.esi.uclm.es/</tspan><tspan
+         style="font-size:15px;text-align:center;text-anchor:middle"
+         id="tspan3590"
+         y="442.9101"
+         x="148.24405"
+         sodipodi:role="line">~oscar.acena/arco_lab.json</tspan></text>
+    <image
+       width="108.75"
+       height="108.75"
+       preserveAspectRatio="none"
+       xlink:href="/home/oscar/itsi.png"
+       id="image3413"
+       x="417.81247"
+       y="280.7486" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="148.24405"
+       x="475.27759"
        y="424.1601"
-       id="text3586"
+       id="text3416"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
-         id="tspan3588"
-         x="148.24405"
+         id="tspan3418"
+         x="475.27759"
          y="424.1601"
          style="font-size:15px;text-align:center;text-anchor:middle">http://arco.esi.uclm.es/</tspan><tspan
          sodipodi:role="line"
-         x="148.24405"
+         x="475.27759"
          y="442.9101"
-         id="tspan3590"
-         style="font-size:15px;text-align:center;text-anchor:middle">~oscar.acena/arco_lab.json</tspan></text>
+         id="tspan3420"
+         style="font-size:15px;text-align:center;text-anchor:middle">~oscar.acena/itsi_lab.json</tspan></text>
   </g>
 </svg>
