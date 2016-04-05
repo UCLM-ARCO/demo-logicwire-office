@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/section_receiver"
+            android:text="@string/section_sender"
             android:id="@+id/textView3"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
@@ -27,7 +27,7 @@
             android:layout_height="match_parent">
 
             <GridLayout
-                android:id="@+id/receivers_holder"
+                android:id="@+id/senders_holder"
 
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/section_sender"
+            android:text="@string/section_receiver"
             android:id="@+id/textView4"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
@@ -70,7 +70,7 @@
             android:layout_height="match_parent">
 
             <GridLayout
-                android:id="@+id/senders_holder"
+                android:id="@+id/receivers_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:useDefaultMargins="true"

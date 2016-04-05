@@ -51,7 +51,7 @@ class ThingObject {
     public String addr;
     public String name;
     public Integer icon;
-    public ThingObject observable;
+    public ThingObject consumer;
 
     private ObjectPrx _router;
 
@@ -60,7 +60,7 @@ class ThingObject {
 
         this.type = type;
         this.addr = idm_addr;
-        this.observable = null;
+        this.consumer = null;
         this._router = router;
 
         // set icon
@@ -85,19 +85,19 @@ class ThingObject {
             this.name = props.getString("name");
     }
 
-    public void setObservable(ThingObject observable) {
-        if (observable != null)
-            setupLink(observable.addr.replace(":", ""), this.addr);
-        else if (this.observable != null)
-            setupLink(this.observable.addr.replace(":", ""), "00:00");
+    public void setConsumer(ThingObject consumer) {
+        if (consumer != null)
+            setupLink(this.addr, consumer.addr);
+        else if (this.consumer != null)
+            setupLink(this.addr, "00:00");
 
-        this.observable = observable;
+        this.consumer = consumer;
     }
 
     private void setupLink(String producer, String consumer) {
-        // get router's proxy with observable.addr
+        // get router's proxy with consumer.addr
         Ice.Communicator ic = _router.ice_getCommunicator();
-        Ice.Identity dst_id = ic.stringToIdentity(producer);
+        Ice.Identity dst_id = ic.stringToIdentity(producer.replace(":", ""));
         ObjectPrx prx = _router.ice_identity(dst_id);
         DUO.IDM.Active.WPrx dst = DUO.IDM.Active.WPrxHelper.uncheckedCast(prx);
 
@@ -141,7 +141,7 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
         tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, _thingObject.icon, 0, 0);
 
         // append linked view (if any)
-        if (_thingObject.observable != null) {
+        if (_thingObject.consumer != null) {
             GridLayout.LayoutParams lp = (GridLayout.LayoutParams) _view.getLayoutParams();
             lp.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 2);
             _view.setLayoutParams(lp);
@@ -150,8 +150,8 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
             addon.setVisibility(View.VISIBLE);
 
             TextView dst_tv = (TextView) _view.findViewById(R.id.DstThingText);
-            dst_tv.setText(_thingObject.observable.name);
-            dst_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, _thingObject.observable.icon, 0, 0);
+            dst_tv.setText(_thingObject.consumer.name);
+            dst_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, _thingObject.consumer.icon, 0, 0);
         }
         else {
             View addon = _view.findViewById(R.id.LinkedThingHolder);
@@ -165,21 +165,13 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
 
     @Override
     public boolean onLongClick(View v) {
-        if (_thingObject.type == ThingObject.Type.SENDER)
-            return onSenderLongClick(v);
-        else
+        if (_thingObject.type == ThingObject.Type.RECEIVER)
             return onReceiverLongClick(v);
+        else
+            return onSenderLongClick(v);
     }
 
     private boolean onSenderLongClick(View v) {
-        ClipData.Item item = new ClipData.Item(_thingObject.addr);
-        ClipData data = new ClipData(_thingObject.addr, new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}, item);
-        View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
-        v.startDrag(data, shadow, _thingObject, 0);
-        return true;
-    }
-
-    private boolean onReceiverLongClick(View v) {
         PopupMenu menu = new PopupMenu(_activity, v);
         menu.setOnMenuItemClickListener(this);
         menu.inflate(R.menu.receiver_menu);
@@ -187,16 +179,24 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
         return true;
     }
 
+    private boolean onReceiverLongClick(View v) {
+        ClipData.Item item = new ClipData.Item(_thingObject.addr);
+        ClipData data = new ClipData(_thingObject.addr, new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}, item);
+        View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
+        v.startDrag(data, shadow, _thingObject, 0);
+        return true;
+    }
+
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        if (_thingObject.observable == null)
+        if (_thingObject.consumer == null)
             return true;
 
-        Toast.makeText(_view.getContext(), "Removing observer of " + _thingObject.observable.name,
+        Toast.makeText(_view.getContext(), "Removing observer of " + _thingObject.name,
                 Toast.LENGTH_LONG).show();
 
-        _activity.enableThing(_thingObject.observable.addr);
-        _thingObject.setObservable(null);
+        _activity.enableThing(_thingObject.consumer.addr);
+        _thingObject.setConsumer(null);
         updateContent();
 
         return true;
@@ -209,24 +209,26 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
         switch (action) {
             case DragEvent.ACTION_DRAG_STARTED: {
                 return event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) &&
-                        _thingObject.type == ThingObject.Type.RECEIVER;
+                        _thingObject.type == ThingObject.Type.SENDER;
             }
 
             case DragEvent.ACTION_DROP: {
                 // drop on non RECEIVER, discard
-                if (_thingObject.type != ThingObject.Type.RECEIVER)
+                if (_thingObject.type != ThingObject.Type.SENDER)
                     return false;
 
                 ThingObject src = (ThingObject) event.getLocalState();
+                if (src == null)
+                    return false;
 
                 // drop on same item, discard
-                if (src != null && src.addr.equals(_thingObject.addr)) {
+                if (src.addr.equals(_thingObject.addr)) {
                     return false;
                 }
 
-                // set dst as observable for src and update views
-                _thingObject.setObservable(src);
-                Toast.makeText(v.getContext(), "Setting " + _thingObject.name + " as observer of " + src.name,
+                // set dst as consumer for src and update views
+                _thingObject.setConsumer(src);
+                Toast.makeText(v.getContext(), "Setting " + src.name + " as observer of " + _thingObject.name,
                         Toast.LENGTH_LONG).show();
                 System.out.println("call " + _thingObject.name + ".setObserver(" + src.name + ")");
                 updateContent();
