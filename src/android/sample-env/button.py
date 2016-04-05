@@ -16,26 +16,24 @@ class ActiveWI(DUO.IDM.Active.W):
         self.state = False
         self.observer = None
 
-    def setObserver(self, addr):
+    def setObserver(self, addr, current):
         oid = self.addr_to_oid(addr)
-        print("Set observer to:", oid)
+        print("\nSet observer to: " + oid.name)
         self.observer = self.router.ice_identity(oid)
         self.observer = DUO.IDM.IBool.WPrx.uncheckedCast(self.observer)
 
     def addr_to_oid(self, addr):
         retval = ""
         for c in addr:
-            retval += "{:02x}:".format(ord(c))
+            retval += "{:02x}".format(ord(c))
         ic = self.router.ice_getCommunicator()
-        return ic.stringToIdentity(retval[:-1])
+        return ic.stringToIdentity(retval)
 
     def notify(self):
-        if self.observer is None:
-            return
-
         new_state = not self.state
-        print("set {} on {}".format(new_state, self.observer))
-        self.observer.set(new_state, [])
+        if self.observer is not None:
+            print("\nSet {} on {}".format(new_state, self.observer))
+            self.observer.set(new_state, [])
         self.state = new_state
 
 
@@ -66,7 +64,7 @@ class ButtonServer(Ice.Application):
     def register_servant(self):
         self.router = self.ic.propertyToProxy("IDM.Router.Proxy")
         self.servant = ActiveWI(self.router)
-        oid = self.ic.stringToIdentity(self.args.oid)
+        oid = self.ic.stringToIdentity(self.args.oid.replace(":", ""))
         self.servant_prx = self.adapter.add(self.servant, oid)
 
     def announce_on_router(self):
@@ -82,13 +80,16 @@ class ButtonServer(Ice.Application):
     def process_kb(self):
         try:
             while True:
-                data = raw_input("> ")
+                data = raw_input("{} (Enter to change)> ".format(self.servant.state))
                 self.process_input(data)
         except EOFError:
             self.communicator().shutdown()
 
     def process_input(self, data):
-        self.servant.notify()
+        try:
+            self.servant.notify()
+        except Ice.Exception, e:
+            print("ERROR: could not notify servant: " + str(e))
 
 
 if __name__ == "__main__":

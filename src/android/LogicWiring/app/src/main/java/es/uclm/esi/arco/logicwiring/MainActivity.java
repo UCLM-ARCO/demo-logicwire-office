@@ -2,13 +2,13 @@ package es.uclm.esi.arco.logicwiring;
 
 import android.content.ClipData;
 import android.content.ClipDescription;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,7 +34,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import Ice.ObjectPrx;
 import PropertyService.PropertyException;
@@ -55,7 +55,9 @@ class ThingObject {
 
     private ObjectPrx _router;
 
-    public ThingObject(String idm_addr, Type type, JSONObject props, ObjectPrx router) throws JSONException {
+    public ThingObject(String idm_addr, Type type, JSONObject props, ObjectPrx router)
+            throws JSONException {
+
         this.type = type;
         this.addr = idm_addr;
         this.observable = null;
@@ -84,15 +86,23 @@ class ThingObject {
     }
 
     public void setObservable(ThingObject observable) {
-        this.observable = observable;
+        if (observable != null)
+            setupLink(observable.addr.replace(":", ""), this.addr);
+        else if (this.observable != null)
+            setupLink(this.observable.addr.replace(":", ""), "00:00");
 
+        this.observable = observable;
+    }
+
+    private void setupLink(String producer, String consumer) {
         // get router's proxy with observable.addr
-        Ice.Identity dst_id = _router.ice_getCommunicator().stringToIdentity(this.addr);
+        Ice.Communicator ic = _router.ice_getCommunicator();
+        Ice.Identity dst_id = ic.stringToIdentity(producer);
         ObjectPrx prx = _router.ice_identity(dst_id);
         DUO.IDM.Active.WPrx dst = DUO.IDM.Active.WPrxHelper.uncheckedCast(prx);
 
-        // call to setObserver with this.addr
-        dst.begin_setObserver(stringToIdmAddress(this.addr));
+        // call to setupLink with this.addr
+        dst.begin_setObserver(stringToIdmAddress(consumer));
     }
 
     private byte[] stringToIdmAddress(String addr) {
@@ -100,22 +110,24 @@ class ThingObject {
         byte[] retval = new byte[fields.length];
 
         for (int i=0; i<fields.length; i++)
-            retval[i] = Byte.parseByte(fields[i]);
+            retval[i] = Byte.parseByte(fields[i], 16);
         return retval;
     }
 }
 
-class ThingView implements View.OnLongClickListener, View.OnDragListener {
+class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupMenu.OnMenuItemClickListener {
 
     private ThingObject _thingObject;
     private View _view;
+    private MainActivity _activity;
 
-    public ThingView(Context context, ViewGroup parent, ThingObject thingObject) {
+    public ThingView(MainActivity activity, ViewGroup parent, ThingObject thingObject) {
         _thingObject = thingObject;
+        _activity = activity;
 
         // load card from XML layout
         LayoutInflater vi;
-        vi = LayoutInflater.from(context);
+        vi = LayoutInflater.from(activity);
         _view = vi.inflate(R.layout.linked_thing_item, null);
         parent.addView(_view);
 
@@ -141,19 +153,52 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
             dst_tv.setText(_thingObject.observable.name);
             dst_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, _thingObject.observable.icon, 0, 0);
         }
+        else {
+            View addon = _view.findViewById(R.id.LinkedThingHolder);
+            addon.setVisibility(View.GONE);
+        }
 
         // connect callbacks
-        if (_thingObject.type == ThingObject.Type.SENDER)
-            tv.setOnLongClickListener(this);
+        tv.setOnLongClickListener(this);
         tv.setOnDragListener(this);
     }
 
     @Override
     public boolean onLongClick(View v) {
+        if (_thingObject.type == ThingObject.Type.SENDER)
+            return onSenderLongClick(v);
+        else
+            return onReceiverLongClick(v);
+    }
+
+    private boolean onSenderLongClick(View v) {
         ClipData.Item item = new ClipData.Item(_thingObject.addr);
         ClipData data = new ClipData(_thingObject.addr, new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}, item);
         View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
         v.startDrag(data, shadow, _thingObject, 0);
+        return true;
+    }
+
+    private boolean onReceiverLongClick(View v) {
+        PopupMenu menu = new PopupMenu(_activity, v);
+        menu.setOnMenuItemClickListener(this);
+        menu.inflate(R.menu.receiver_menu);
+        menu.show();
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        if (_thingObject.observable == null)
+            return true;
+
+        Toast.makeText(_view.getContext(), "Removing observer of " + _thingObject.observable.name,
+                Toast.LENGTH_LONG).show();
+
+        _activity.enableThing(_thingObject.observable.addr);
+        _thingObject.setObservable(null);
+        updateContent();
+
         return true;
     }
 
@@ -175,7 +220,7 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
                 ThingObject src = (ThingObject) event.getLocalState();
 
                 // drop on same item, discard
-                if (Objects.equals(src.addr, _thingObject.addr)) {
+                if (src != null && src.addr.equals(_thingObject.addr)) {
                     return false;
                 }
 
@@ -192,7 +237,7 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
             case DragEvent.ACTION_DRAG_ENDED: {
                 if (event.getResult()) {
                     ThingObject src = (ThingObject) event.getLocalState();
-                    if (Objects.equals(src.addr, _thingObject.addr))
+                    if (src != null && src.addr.equals(_thingObject.addr))
                         _view.setAlpha((float) 0.5);
                 }
 
@@ -201,6 +246,10 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener {
         }
 
         return false;
+    }
+
+    public void enable() {
+        _view.setAlpha((float) 1);
     }
 }
 
@@ -216,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Action _current_action = Action.NONE;
-    private HashMap<String, ThingObject> _things;
+    private HashMap<String, ThingView> _thingViews;
     private Ice.Communicator _ic;
     private ObjectPrx _router;
     private PropertyServerPrx _ps;
@@ -227,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String idm_str_proxy = sharedPref.getString(PREF_IDM_ROUTER, "");
-        _things = new HashMap<>();
+        _thingViews = new HashMap<>();
 
         if (idm_str_proxy.isEmpty())
             setContentView(R.layout.welcome_activity);
@@ -241,6 +290,7 @@ public class MainActivity extends AppCompatActivity {
             // DEBUG
             try {
                 addThingFromQR("10:00");
+                addThingFromQR("11:00");
             } catch (JSONException e) {
                 Toast.makeText(this, "Error: " + e.toString(), Toast.LENGTH_LONG).show();
                 e.printStackTrace();
@@ -294,6 +344,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String content = result.getContents();
+        if (content == null)
+            return;
+
         switch (_current_action) {
             case ADD_THING:
                 try {
@@ -317,13 +370,13 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (addr.startsWith("http://")) {
+        if (addr == null || addr.startsWith("http://")) {
             Toast.makeText(this, getResources().getText(R.string.error_invalid_addr)
                     + ": " + addr, Toast.LENGTH_LONG).show();
             return;
         }
 
-        if (_things.containsKey(addr)) {
+        if (_thingViews.containsKey(addr)) {
             Toast.makeText(this, getResources().getText(R.string.error_repeated_addr)
                     + ": " + addr, Toast.LENGTH_LONG).show();
             return;
@@ -387,8 +440,8 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("Adding " + addr + " as " + type.toString());
         GridLayout holder = (GridLayout) findViewById(holder_id);
         ThingObject t = new ThingObject(addr, type, props, _router);
-        _things.put(addr, t);
-        new ThingView(this, holder, t);
+
+        _thingViews.put(addr, new ThingView(this, holder, t));
     }
 
     private ArrayList<String> JSONArrayToList(JSONArray tags) throws JSONException {
@@ -489,10 +542,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createCommunicator() {
-        Ice.InitializationData idata = new Ice.InitializationData();
+        final Ice.InitializationData idata = new Ice.InitializationData();
         idata.properties = Ice.Util.createProperties();
+        idata.properties.setProperty("Ice.IPv6", "0");
 
-        _ic = Ice.Util.initialize(idata);
+        class MyTask extends AsyncTask<Void, Void, Void> {
+            @Override
+            protected Void doInBackground(Void... params) {
+                _ic = Ice.Util.initialize(idata);
+                return null;
+            }
+        }
+        try {
+            new MyTask().execute().get();
+        } catch (InterruptedException | ExecutionException e){
+            e.printStackTrace();
+        }
     }
 
     private void createProxies() {
@@ -512,5 +577,13 @@ public class MainActivity extends AppCompatActivity {
         } catch (Ice.Exception e) {
             Toast.makeText(this, getString(R.string.ps_unreachable), Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void enableThing(String addr) {
+        if (!_thingViews.containsKey(addr))
+            return;
+
+        ThingView v = _thingViews.get(addr);
+        v.enable();
     }
 }

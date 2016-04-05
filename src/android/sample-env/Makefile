@@ -14,18 +14,29 @@ run-router:
 	idm-router --Ice.Config=router.config
 
 run-button:
-	./button.py --oid "1002" --Ice.Config=client.config
+	./button.py --oid "1001" --Ice.Config=client.config
 
 setup-nodes:
 	$(PSTOOL) set "10:00 | children" "['10:01', '10:02']" -t stringseq
 
 	$(PSTOOL) set "10:01 | tags" "['producer']" -t stringseq
-	$(PSTOOL) set "10:01 | name" "button" -t string
+	$(PSTOOL) set "10:01 | name" "button1" -t string
 	$(PSTOOL) set "10:01 | icon" "touch" -t string
 
 	$(PSTOOL) set "10:02 | tags" "['consumer']" -t stringseq
-	$(PSTOOL) set "10:02 | name" "lamp" -t string
+	$(PSTOOL) set "10:02 | name" "lamp1" -t string
 	$(PSTOOL) set "10:02 | icon" "bulb" -t string
+
+
+	$(PSTOOL) set "11:00 | children" "['11:01', '11:02']" -t stringseq
+
+	$(PSTOOL) set "11:01 | tags" "['producer']" -t stringseq
+	$(PSTOOL) set "11:01 | name" "button2" -t string
+	$(PSTOOL) set "11:01 | icon" "touch" -t string
+
+	$(PSTOOL) set "11:02 | tags" "['consumer']" -t stringseq
+	$(PSTOOL) set "11:02 | name" "lamp2" -t string
+	$(PSTOOL) set "11:02 | icon" "bulb" -t string
 
 
 .PHONY: clean
