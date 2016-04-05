@@ -34,7 +34,7 @@
             <ImageView
                 android:layerType="software"
                 android:src="@drawable/vertical_dotted"
-                android:layout_width="10dp"
+                android:layout_width="12dp"
                 android:layout_height="match_parent"/>
 
             <TextView

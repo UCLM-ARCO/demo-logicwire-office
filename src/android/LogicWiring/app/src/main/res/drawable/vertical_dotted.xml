@@ -1,21 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<!--<layer-list xmlns:android="http://schemas.android.com/apk/res/android">-->
 
-    <item
-        android:left="-300dp"
-        android:right="-300dp">
+    <!--<item android:bottom="20dp"-->
+        <!--android:left="-300dp"-->
+        <!--android:right="-300dp">-->
 
+        <!--<rotate-->
+            <!--android:fromDegrees="80"-->
+            <!--android:toDegrees="80">-->
+
+            <!--<shape android:shape="line">-->
+                <!--<stroke-->
+                    <!--android:color="#555"-->
+                    <!--android:dashWidth="6dp"-->
+                    <!--android:dashGap="6dp"-->
+                    <!--android:width="2dp"/>-->
+            <!--</shape>-->
+        <!--</rotate>-->
+    <!--</item>-->
+
+    <!--<item android:top="20dp"-->
+        <!--android:left="-300dp"-->
+        <!--android:right="-300dp">-->
+
+        <!--<rotate-->
+            <!--android:fromDegrees="100"-->
+            <!--android:toDegrees="100">-->
+
+            <!--<shape android:shape="line">-->
+                <!--<stroke-->
+                    <!--android:color="#555"-->
+                    <!--android:dashWidth="6dp"-->
+                    <!--android:dashGap="6dp"-->
+                    <!--android:width="2dp"/>-->
+            <!--</shape>-->
+        <!--</rotate>-->
+
+    <!--</item>-->
+<!--</layer-list>-->
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item>
+        <shape>
+            <solid android:color="@android:color/transparent"/>
+            <size android:width="0.3dp" android:height="40.78dp"/>
+        </shape>
+    </item>
+
+    <item android:bottom="20dp">
         <rotate
-            android:fromDegrees="90"
-            android:toDegrees="90">
+            android:fromDegrees="-15"
+            android:toDegrees="15">
+            <shape android:shape="rectangle">
+                <solid android:color="#959595"/>
+                <corners android:radius="1dp" />
+            </shape>
+        </rotate>
+    </item>
 
-            <shape android:shape="line">
-                <stroke
-                    android:color="#555"
-                    android:dashWidth="6dp"
-                    android:dashGap="6dp"
-                    android:width="2dp"/>
+    <item android:top="20dp">
+        <rotate
+            android:fromDegrees="15"
+            android:toDegrees="15">
+            <shape android:shape="rectangle">
+                <solid android:color="#959595"/>
+                <corners android:radius="1dp" />
             </shape>
         </rotate>
     </item>
