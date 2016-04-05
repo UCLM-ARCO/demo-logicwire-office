@@ -195,10 +195,8 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
         Toast.makeText(_view.getContext(), "Removing observer of " + _thingObject.name,
                 Toast.LENGTH_LONG).show();
 
-        _activity.enableThing(_thingObject.consumer.addr);
         _thingObject.setConsumer(null);
         updateContent();
-
         return true;
     }
 
@@ -237,21 +235,11 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
             }
 
             case DragEvent.ACTION_DRAG_ENDED: {
-                if (event.getResult()) {
-                    ThingObject src = (ThingObject) event.getLocalState();
-                    if (src != null && src.addr.equals(_thingObject.addr))
-                        _view.setAlpha((float) 0.5);
-                }
-
                 return true;
             }
         }
 
         return false;
-    }
-
-    public void enable() {
-        _view.setAlpha((float) 1);
     }
 }
 
@@ -579,13 +567,5 @@ public class MainActivity extends AppCompatActivity {
         } catch (Ice.Exception e) {
             Toast.makeText(this, getString(R.string.ps_unreachable), Toast.LENGTH_LONG).show();
         }
-    }
-
-    public void enableThing(String addr) {
-        if (!_thingViews.containsKey(addr))
-            return;
-
-        ThingView v = _thingViews.get(addr);
-        v.enable();
     }
 }
