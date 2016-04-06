@@ -276,15 +276,6 @@ public class MainActivity extends AppCompatActivity {
 
             createCommunicator();
             createProxies();
-
-            // DEBUG
-            try {
-                addThingFromQR("10:00");
-                addThingFromQR("11:00");
-            } catch (JSONException e) {
-                Toast.makeText(this, "Error: " + e.toString(), Toast.LENGTH_LONG).show();
-                e.printStackTrace();
-            }
         }
     }
 
@@ -337,6 +328,11 @@ public class MainActivity extends AppCompatActivity {
         if (content == null)
             return;
 
+        // Remove UTF-16 BOM (if present)
+        if (content.startsWith("\uFEFF")) {
+            content = content.substring(1);
+        }
+
         switch (_current_action) {
             case ADD_THING:
                 try {
@@ -355,6 +351,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addThingFromQR(String addr) throws JSONException {
+        if (addr != null)
+            addr = addr.trim();
+
         if (_ps == null) {
             Toast.makeText(this, getString(R.string.ps_unreachable), Toast.LENGTH_LONG).show();
             return;
@@ -443,7 +442,7 @@ public class MainActivity extends AppCompatActivity {
 
     private JSONObject getProperties(String addr) {
         try {
-            String str_props = _ps.getJSON(addr);
+            String str_props = _ps.getJSON(addr.trim());
             return new JSONObject(str_props);
         } catch (JSONException | PropertyException e) {
             Toast.makeText(this, getString(R.string.unable_to_get_properties)
