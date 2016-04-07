@@ -98,7 +98,11 @@ DUO_IDM_Active_WI_setObserver(DUO_IDM_Active_WPtr self_, IDM_Address observer) {
     IoT_IBoolIPtr self = (IoT_IBoolIPtr)self_;
     uint16_t ob_addr = (observer.items[0] << 8) + observer.items[1];
 
-    addr_to_identity(ob_addr, self->observer_id);
+    if (ob_addr == 0)
+	self->observer_id[0] = 0;
+    else
+	addr_to_identity(ob_addr, self->observer_id);
+
     IceC_Storage_put(self->observer_dbindex, self->observer_id, 5);
     Serial.printf("DUO: set observer to '%s'\n", self->observer_id);
 }
@@ -195,15 +199,17 @@ setup() {
     // initialize and register servants
     char oid[5];
 
-    addr_to_identity(my_idm_address_items + 1, oid);
+    addr_to_identity(my_idm_address_items, oid);
+    Serial.printf("NODE addr: '%s'\n", oid);
+
     IoT_Node_init(&node);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&node, oid);
 
-    addr_to_identity(my_idm_address_items + 2, oid);
+    addr_to_identity(my_idm_address_items + 1, oid);
+    Serial.printf("RELAY addr: '%s'\n", oid);
+
     IoT_IBoolI_init(&relay, DBINDEX_RELAY);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&relay, oid);
-
-    Serial.println("IDM: node address: " IDM_ADDR);
 
     // create dummy proxy to router and announce objects
     create_router_proxy();

@@ -60,14 +60,10 @@ class Client(Ice.Application):
         node.factoryReset()
 
     def set_observer(self, args):
-        # first object is node, buttons are 2, 3...
-        button = args[args.index("--set-observer") + 1]
-        button = str(int(button) + 1)
-
         addr = args[args.index("--set-observer") + 2]
         addr = self.string_to_addr(addr)
 
-        node = self.get_proxy(button, args)
+        node = self.get_proxy(args)
         node = IoT.IBoolPrx.uncheckedCast(node)
         node.setObserver(addr)
 
@@ -77,13 +73,12 @@ class Client(Ice.Application):
         node.setIDMRouter(router)
 
     def get_config_proxy(self, args):
-        proxy = self.get_proxy("1", args)
+        proxy = self.get_proxy(args)
         return IoT.NodePrx.uncheckedCast(proxy)
 
-    def get_proxy(self, oid, args):
+    def get_proxy(self, args):
         ic = self.communicator()
         addr = args[1].replace(":", "")
-        addr = addr[:3] + oid
         host = args[2]
         proxy = "{} -e 1.0 -o:tcp -h {} -p 4455".format(addr, host)
         return ic.stringToProxy(proxy)

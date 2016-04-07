@@ -82,7 +82,11 @@ DUO_IDM_Active_WI_setObserver(DUO_IDM_Active_WPtr self_, IDM_Address observer) {
     DUO_ActiveIPtr self = (DUO_ActiveIPtr)self_;
     uint16_t ob_addr = (observer.items[0] << 8) + observer.items[1];
 
-    addr_to_identity(ob_addr, self->observer_id);
+    if (ob_addr == 0)
+	self->observer_id[0] = 0;
+    else
+	addr_to_identity(ob_addr, self->observer_id);
+
     IceC_Storage_put(self->observer_dbindex, self->observer_id, 5);
     byte button_id = self->pin == PIN_BUTTON1 ? 1 : 2;
     Serial.printf("DUO: set B%d observer to '%s'\n", button_id, self->observer_id);
@@ -179,19 +183,20 @@ setup() {
     // initialize and register servants
     char oid[5];
 
-    addr_to_identity(my_idm_address_items + 1, oid);
+    addr_to_identity(my_idm_address_items, oid);
+    Serial.printf("NODE addr: '%s'\n", oid);
     IoT_Node_init(&node);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&node, oid);
 
-    addr_to_identity(my_idm_address_items + 2, oid);
+    addr_to_identity(my_idm_address_items + 1, oid);
+    Serial.printf("BUTTON1 addr: '%s'\n", oid);
     DUO_ActiveI_init(&button1, DBINDEX_BUTTON1, PIN_BUTTON1);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&button1, oid);
 
-    addr_to_identity(my_idm_address_items + 3, oid);
+    addr_to_identity(my_idm_address_items + 2, oid);
+    Serial.printf("BUTTON2 addr: '%s'\n", oid);
     DUO_ActiveI_init(&button2, DBINDEX_BUTTON2, PIN_BUTTON2);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&button2, oid);
-
-    Serial.println("IDM: node address: " IDM_ADDR);
 
     // create dummy proxy to router and announce objects
     create_router_proxy();

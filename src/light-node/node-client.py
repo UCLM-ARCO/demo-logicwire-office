@@ -86,17 +86,16 @@ class Client(Ice.Application):
         node.setIDMRouter(router)
 
     def get_config_proxy(self, args):
-        proxy = self.get_proxy("1", args)
+        proxy = self.get_proxy(args)
         return IoT.NodePrx.uncheckedCast(proxy)
 
     def get_state_proxy(self, args):
-        proxy = self.get_proxy("2", args)
+        proxy = self.get_proxy(args)
         return IoT.IBoolPrx.uncheckedCast(proxy)
 
-    def get_proxy(self, oid, args):
+    def get_proxy(self, args):
         ic = self.communicator()
         addr = args[1].replace(":", "")
-        addr = addr[:3] + oid
         host = args[2]
         proxy = "{} -e 1.0 -o:tcp -h {} -p 4455".format(addr, host)
         return ic.stringToProxy(proxy)
