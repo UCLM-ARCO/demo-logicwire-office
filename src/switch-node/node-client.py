@@ -60,7 +60,7 @@ class Client(Ice.Application):
         node.factoryReset()
 
     def set_observer(self, args):
-        addr = args[args.index("--set-observer") + 2]
+        addr = args[args.index("--set-observer") + 1]
         addr = self.string_to_addr(addr)
 
         node = self.get_proxy(args)
