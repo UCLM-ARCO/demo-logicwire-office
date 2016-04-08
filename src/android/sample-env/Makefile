@@ -3,7 +3,7 @@
 PRJDIR	 = $(shell /usr/share/arco/get-project-dir.sh)
 PSDIR 	 = $(PRJDIR)/../ice.property-service-simple
 PS	 = $(PSDIR)/PropertyService/server.py
-PSTOOL   = $(PSDIR)/PropertyService/prop-tool.py
+PSTOOL   = $(PSDIR)/PropertyService/prop-tool
 
 all:
 
@@ -14,7 +14,7 @@ run-router:
 	idm-router --Ice.Config=router.config
 
 run-button:
-	./button.py --oid "1001" --Ice.Config=client.config
+	./button.py --oid "1001" --Ice.Config=button.config
 
 setup-nodes:
 	$(PSTOOL) set "10:00 | children" "['10:01', '10:02']" -t stringseq

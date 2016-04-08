@@ -36,7 +36,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
+import Ice.EncodingVersion;
 import Ice.ObjectPrx;
+import Ice.Util;
 import PropertyService.PropertyException;
 import PropertyService.PropertyServerPrx;
 import PropertyService.PropertyServerPrxHelper;
@@ -95,11 +97,14 @@ class ThingObject {
     }
 
     private void setupLink(String producer, String consumer) {
+        System.out.println("call " + producer + ".setObserver(" + consumer + ")");
+
         // get router's proxy with consumer.addr
         Ice.Communicator ic = _router.ice_getCommunicator();
         Ice.Identity dst_id = ic.stringToIdentity(producer.replace(":", ""));
-        ObjectPrx prx = _router.ice_identity(dst_id);
+        ObjectPrx prx = _router.ice_identity(dst_id).ice_encodingVersion(Util.Encoding_1_0);
         DUO.IDM.Active.WPrx dst = DUO.IDM.Active.WPrxHelper.uncheckedCast(prx);
+        System.out.println("Using proxy: '" + prx.toString() + "'");
 
         // call to setupLink with this.addr
         dst.begin_setObserver(stringToIdmAddress(consumer));
@@ -228,7 +233,6 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
                 _thingObject.setConsumer(src);
                 Toast.makeText(v.getContext(), "Setting " + src.name + " as observer of " + _thingObject.name,
                         Toast.LENGTH_LONG).show();
-                System.out.println("call " + _thingObject.name + ".setObserver(" + src.name + ")");
                 updateContent();
 
                 return true;

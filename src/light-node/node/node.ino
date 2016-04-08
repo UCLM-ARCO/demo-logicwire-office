@@ -387,9 +387,9 @@ announce_idm_objects() {
     Ice_String_init(ice_strprx, strprx.c_str());			\
     IDM_NeighborDiscovery_Listener_adv(&sink, ice_strprx);
 
-    addr_to_identity(my_idm_address_items + 1, oid);
+    addr_to_identity(my_idm_address_items, oid);
     ADV(oid);
-    addr_to_identity(my_idm_address_items + 2, oid);
+    addr_to_identity(my_idm_address_items + 1, oid);
     ADV(oid);
 
     Serial.println("IDM: advertisements sent");

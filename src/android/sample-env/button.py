@@ -47,9 +47,10 @@ class ButtonServer(Ice.Application):
         self.register_servant()
         self.announce_on_router()
         self.event_loop()
+        self.bye_on_router()
 
     def parse_arguments(self, args):
-        add_argument("--oid", default="10:01", help="Object ID")
+        add_argument("--oid", default="10:10", help="Object ID")
         try:
             self.args = parser.parse_args(args[1:])
             return True
@@ -58,7 +59,7 @@ class ButtonServer(Ice.Application):
 
     def create_adapter(self):
         self.ic = self.communicator()
-        self.adapter = self.ic.createObjectAdapterWithEndpoints("Adapter", "tcp")
+        self.adapter = self.ic.createObjectAdapter("Adapter")
         self.adapter.activate()
 
     def register_servant(self):
@@ -70,6 +71,14 @@ class ButtonServer(Ice.Application):
     def announce_on_router(self):
         self.router = IDM.NeighborDiscovery.ListenerPrx.checkedCast(self.router)
         self.router.adv(self.ic.proxyToString(self.servant_prx))
+
+    def bye_on_router(self):
+        self.router = IDM.NeighborDiscovery.ListenerPrx.checkedCast(self.router)
+        self.router.bye(self.oid_to_addr(self.args.oid))
+
+    def oid_to_addr(self, oid):
+        oid = oid.replace(":", "")
+        return [int(oid[:2], 16), int(oid[2:4], 16)]
 
     def event_loop(self):
         print "Object ready: '{}'".format(self.servant_prx)
