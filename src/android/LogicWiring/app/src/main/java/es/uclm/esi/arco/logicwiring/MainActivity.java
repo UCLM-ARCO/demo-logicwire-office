@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
-import Ice.EncodingVersion;
 import Ice.ObjectPrx;
 import Ice.Util;
 import PropertyService.PropertyException;
@@ -369,12 +368,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (_thingViews.containsKey(addr)) {
-            Toast.makeText(this, getResources().getText(R.string.error_repeated_addr)
-                    + ": " + addr, Toast.LENGTH_LONG).show();
-            return;
-        }
-
         // contact with PS to retrieve this object's properties
         System.out.println("Retrieving properties from PS server...");
         JSONObject props = getProperties(addr);
@@ -410,6 +403,12 @@ public class MainActivity extends AppCompatActivity {
     private void addThingWithProps(String addr, JSONObject props) throws JSONException {
         if (! props.has("tags")) {
             System.out.println("Invalid thing: missing 'tags' property");
+            return;
+        }
+
+        if (_thingViews.containsKey(addr)) {
+            Toast.makeText(this, getResources().getText(R.string.error_repeated_addr)
+                    + ": " + addr, Toast.LENGTH_SHORT).show();
             return;
         }
 
