@@ -41,6 +41,9 @@ import Ice.Util;
 import PropertyService.PropertyException;
 import PropertyService.PropertyServerPrx;
 import PropertyService.PropertyServerPrxHelper;
+import ThingSlice.TypeCode;
+
+import static java.lang.Math.min;
 
 class ThingObject {
     public enum Type {
@@ -55,14 +58,16 @@ class ThingObject {
     public ThingObject consumer;
 
     private ObjectPrx _router;
+    private PropertyServerPrx _ps;
 
-    public ThingObject(String idm_addr, Type type, JSONObject props, ObjectPrx router)
+    public ThingObject(String idm_addr, Type type, JSONObject props, ObjectPrx router, PropertyServerPrx ps)
             throws JSONException {
 
         this.type = type;
         this.addr = idm_addr;
         this.consumer = null;
         this._router = router;
+        this._ps = ps;
 
         // set icon
         HashMap<String, Integer> icons = new HashMap<>();
@@ -87,10 +92,17 @@ class ThingObject {
     }
 
     public void setConsumer(ThingObject consumer) {
-        if (consumer != null)
+        if (consumer != null) {
             setupLink(this.addr, consumer.addr);
-        else if (this.consumer != null)
+
+            ThingSlice.T v = new ThingSlice.T(TypeCode.stringT, stringToByteseq(consumer.addr));
+            _ps.begin_set(this.addr + "| observer", v);
+        }
+        else if (this.consumer != null) {
             setupLink(this.addr, "00:00");
+
+            _ps.begin_remove(this.addr + "| observer");
+        }
 
         this.consumer = consumer;
     }
@@ -117,6 +129,13 @@ class ThingObject {
             retval[i] = Byte.parseByte(fields[i], 16);
         return retval;
     }
+
+    private byte[] stringToByteseq(String s) {
+        byte[] retval = new byte[s.length() + 1];
+        retval[0] = (byte) min(255, s.length());
+        System.arraycopy(s.getBytes(), 0, retval, 1, s.length());
+        return retval;
+    }
 }
 
 class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupMenu.OnMenuItemClickListener {
@@ -138,7 +157,7 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
         updateContent();
     }
 
-    private void updateContent() {
+    public void updateContent() {
         // setup card
         TextView tv = (TextView) _view.findViewById(R.id.SrcThingText);
         tv.setText(_thingObject.name);
@@ -244,6 +263,10 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
 
         return false;
     }
+
+    public ThingObject getThingObject() {
+        return _thingObject;
+    }
 }
 
 public class MainActivity extends AppCompatActivity {
@@ -339,7 +362,7 @@ public class MainActivity extends AppCompatActivity {
         switch (_current_action) {
             case ADD_THING:
                 try {
-                    addThingFromQR(content);
+                    addThingFromAddr(content);
                 } catch (JSONException e) {
                     Toast.makeText(this, getString(R.string.error_with_properties),
                             Toast.LENGTH_LONG).show();
@@ -353,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void addThingFromQR(String addr) throws JSONException {
+    private void addThingFromAddr(String addr) throws JSONException {
         if (addr != null)
             addr = addr.trim();
 
@@ -431,9 +454,26 @@ public class MainActivity extends AppCompatActivity {
 
         System.out.println("Adding " + addr + " as " + type.toString());
         GridLayout holder = (GridLayout) findViewById(holder_id);
-        ThingObject t = new ThingObject(addr, type, props, _router);
+        ThingObject t = new ThingObject(addr, type, props, _router, _ps);
 
-        _thingViews.put(addr, new ThingView(this, holder, t));
+        ThingView v = new ThingView(this, holder, t);
+        _thingViews.put(addr, v);
+
+        // restore linked observer
+        if (props.has("observer")) {
+            String observer = props.getString("observer");
+            if (observer.equals(addr)) {
+                System.out.println("Invalid observer: same as object id");
+                return;
+            }
+
+            if (! _thingViews.containsKey(observer))
+                addThingFromAddr(observer);
+
+            ThingObject consumer = _thingViews.get(observer).getThingObject();
+            t.consumer = consumer;
+            v.updateContent();
+        }
     }
 
     private ArrayList<String> JSONArrayToList(JSONArray tags) throws JSONException {
