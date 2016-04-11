@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Logic Wiring</string>
-    <string name="action_settings">Configuración</string>
+    <string name="action_view_settings">Configuración</string>
     <string name="lets_begin">Empecemos configurando el sitio</string>
     <string name="pref_idm_router">Proxy del router IDM</string>
     <string name="start">INICIO</string>

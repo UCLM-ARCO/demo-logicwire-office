@@ -271,8 +271,8 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String PREF_PROPERTY_SERVER = "pref_property_server";
-    private static final String PREF_IDM_ROUTER = "pref_idm_router";
+    public static final String PREF_PROPERTY_SERVER = "pref_property_server";
+    public static final String PREF_IDM_ROUTER = "pref_idm_router";
 
     enum Action {
         NONE,
@@ -320,8 +320,13 @@ public class MainActivity extends AppCompatActivity {
                 getQRScannerIntentIntegrator().initiateScan();
                 return true;
 
-            case R.id.action_settings:
+            case R.id.action_load_settings:
                 onStartClicked(null);
+                return true;
+
+            case R.id.action_edit_settings:
+                Intent prefs = new Intent(this, SettingsActivity.class);
+                startActivity(prefs);
                 return true;
 
             default:

@@ -7,7 +7,14 @@
         android:title="@string/action_add"
         app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
+    <item android:id="@+id/action_edit_settings"
+        android:title="@string/action_edit_settings"
+        app:showAsAction="never">
+    </item>
+
+    <item android:id="@+id/action_load_settings"
+        android:title="@string/load_settings"
+        app:showAsAction="never">
+    </item>
+
 </menu>

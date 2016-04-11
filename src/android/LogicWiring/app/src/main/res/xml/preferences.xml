@@ -4,4 +4,11 @@
         android:key="pref_idm_router"
         android:title="@string/pref_idm_router"
         android:defaultValue="" />
+
+    <EditTextPreference
+        android:key="pref_property_server"
+        android:title="@string/pref_ps_proxy"
+        android:defaultValue="" />
+
+
 </PreferenceScreen>
