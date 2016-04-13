@@ -1,5 +1,22 @@
 apply plugin: 'com.android.application'
+apply plugin: 'slice'
 
+slice {
+    java {
+        // add a new file() for each .ice (even those included inside others .ice)
+        files = [file("/usr/share/slice/duo/duo_idm.ice"),
+                 file("/usr/share/slice/idm/idm.ice"),
+                 file("/usr/share/slice/thing/thing.ice"),
+                 file("/usr/share/slice/PropertyService/PropertyService.ice")
+        ]
+
+        // search path for includes
+        args = "-I/usr/share/slice"
+    }
+
+    // add this if you want Android Studio to find .java and get completion
+    output = file("src/generated")
+}
 
 android {
     compileSdkVersion 23
@@ -18,10 +35,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+        main.java.srcDirs += ["$project.slice.output"]
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.android.support:wearable:1.4.0'
     compile 'com.google.android.gms:play-services-wearable:8.4.0'
+    compile 'com.zeroc:ice:3.6.1'
+
 }
