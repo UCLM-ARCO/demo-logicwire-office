@@ -1,10 +1,17 @@
 package es.uclm.esi.arco.smartbutton;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.wearable.view.FragmentGridPagerAdapter;
+import android.support.wearable.view.GridViewPager;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import java.util.concurrent.ExecutionException;
@@ -13,11 +20,47 @@ import Ice.Current;
 import Ice.ObjectAdapter;
 import Ice.ObjectPrx;
 
+class CustomGridPageAdapter extends FragmentGridPagerAdapter {
+
+    private final Context context;
+
+    public CustomGridPageAdapter(Context ctx, FragmentManager fm) {
+        super(fm);
+        context = ctx;
+    }
+
+    @Override
+    public Fragment getFragment(int row, int col) {
+        if (col == 0)
+            return  new ButtonFragment();
+
+        String address = PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getString(MainActivity.PREF_IDM_ADDRESS, "");
+
+        Bundle args = new Bundle();
+        args.putString("address", address);
+        QRFragment f = new QRFragment();
+        f.setArguments(args);
+        return f;
+    }
+
+    @Override
+    public int getRowCount() {
+        return 1;
+    }
+
+    @Override
+    public int getColumnCount(int i) {
+        return 2;
+    }
+}
+
 public class MainActivity extends Activity {
 
-    private static final String PREF_IDM_ROUTER = "pref_idm_router";
-    private static final String PREF_OBSERVER = "pref_observer";
-    private static final String PREF_IDM_ADDRESS = "pref_idm_address";
+    public static final String PREF_IDM_ROUTER = "pref_idm_router";
+    public static final String PREF_OBSERVER = "pref_observer";
+    public static final String PREF_IDM_ADDRESS = "pref_idm_address";
 
     private boolean _buttonState = false;
     private Ice.Communicator _ic;
@@ -31,6 +74,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        final GridViewPager pager = (GridViewPager) findViewById(R.id.pager);
+        pager.setAdapter(new CustomGridPageAdapter(this, getFragmentManager()));
+
         asyncIceSetup();
     }
 
@@ -125,7 +172,7 @@ public class MainActivity extends Activity {
     void createObserverProxyFromAddr(String addr) {
         if (_router == null)
             return;
-        
+
         ObjectPrx prx = _router.ice_identity(_ic.stringToIdentity(addr));
         _observer = DUO.IDM.IBool.WPrxHelper.uncheckedCast(prx);
     }

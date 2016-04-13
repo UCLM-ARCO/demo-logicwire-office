@@ -45,6 +45,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.android.support:wearable:1.4.0'
     compile 'com.google.android.gms:play-services-wearable:8.4.0'
-    compile 'com.zeroc:ice:3.6.1'
 
+    compile 'com.zeroc:ice:3.6.1'
+    compile 'com.google.zxing:core:3.2.1'
 }
