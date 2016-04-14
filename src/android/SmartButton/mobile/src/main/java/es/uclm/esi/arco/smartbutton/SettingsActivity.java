@@ -2,22 +2,14 @@ package es.uclm.esi.arco.smartbutton;
 
 
 import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.RingtonePreference;
-import android.text.TextUtils;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.List;
@@ -28,12 +20,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     public static final String PREF_IDM_ROUTER = "pref_idm_router";
     public static final String PREF_IDM_ADDRESS = "pref_idm_address";
 
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener
-            = new Preference.OnPreferenceChangeListener() {
+    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
 
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
+
+            if (stringValue.isEmpty())
+                stringValue = "<not set>";
+
             preference.setSummary(stringValue);
             return true;
         }
@@ -50,26 +45,21 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupActionBar();
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new GeneralPreferenceFragment())
+                .commit();
     }
 
-    private void setupActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            // actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.actions, menu);
+        return true;
     }
 
     @Override
     public boolean onIsMultiPane() {
         return (getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
-    }
-
-    @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public void onBuildHeaders(List<Header> target) {
-        loadHeadersFromResource(R.xml.pref_general, target);
     }
 
     protected boolean isValidFragment(String fragmentName) {
@@ -82,7 +72,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general);
+            addPreferencesFromResource(R.xml.preferences);
             setHasOptionsMenu(true);
 
             bindPreferenceSummaryToValue(findPreference(PREF_IDM_ROUTER));

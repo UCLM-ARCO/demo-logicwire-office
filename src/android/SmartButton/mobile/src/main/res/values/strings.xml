@@ -59,4 +59,9 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="pref_idm_router">IDM Rouer proxy</string>
+    <string name="pref_ps_proxy">Property Service proxy</string>
+    <string name="pref_idm_address">IDM Address</string>
+    <string name="action_load_settins">Load Settings</string>
+    <string name="action_sync_settings">Sync</string>
 </resources>

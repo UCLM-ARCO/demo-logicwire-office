@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
     <EditTextPreference
         android:key="pref_idm_router"
         android:title="@string/pref_idm_router"
@@ -9,6 +11,5 @@
         android:key="pref_property_server"
         android:title="@string/pref_ps_proxy"
         android:defaultValue="" />
-
 
 </PreferenceScreen>

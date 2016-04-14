@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_load_settings"
+        android:icon="@drawable/ic_aspect_ratio_white_24dp"
+        android:title="@string/action_load_settins"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_sync_settings"
+        android:icon="@drawable/ic_sync_white_24dp"
+        android:title="@string/action_sync_settings"
+        app:showAsAction="ifRoom" />
+
+</menu>
