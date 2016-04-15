@@ -5,11 +5,13 @@
     <item android:id="@+id/action_load_settings"
         android:icon="@drawable/ic_aspect_ratio_white_24dp"
         android:title="@string/action_load_settins"
+        android:onClick="onLoadSettings"
         app:showAsAction="ifRoom" />
 
     <item android:id="@+id/action_sync_settings"
-        android:icon="@drawable/ic_sync_white_24dp"
+        android:icon="@drawable/ic_sync_red_24dp"
         android:title="@string/action_sync_settings"
+        android:onClick="onSyncSettings"
         app:showAsAction="ifRoom" />
 
 </menu>

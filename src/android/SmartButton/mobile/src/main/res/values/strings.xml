@@ -64,4 +64,12 @@
     <string name="pref_idm_address">IDM Address</string>
     <string name="action_load_settins">Load Settings</string>
     <string name="action_sync_settings">Sync</string>
+    <string name="scan_qr_prompt">Looking for a QR code…</string>
+    <string name="error_invalid_contents">Invalid contents</string>
+    <string name="error_cant_connect">Can not connect</string>
+    <string name="error_invalid_retrieved_config">Invalid retrieved config</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ps_unreachable">Property Service not reachable!</string>
 </resources>
