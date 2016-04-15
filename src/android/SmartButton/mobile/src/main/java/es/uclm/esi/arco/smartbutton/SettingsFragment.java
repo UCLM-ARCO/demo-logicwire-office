@@ -6,8 +6,6 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import java.util.Objects;
-
 public class SettingsFragment extends PreferenceFragment {
 
     private Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener

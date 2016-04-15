@@ -56,6 +56,9 @@ class CustomGridPageAdapter extends FragmentGridPagerAdapter {
     }
 }
 
+
+FIXME: implement DataListener: http://developer.android.com/training/wearables/data-layer/data-items.html
+
 public class MainActivity extends Activity {
 
     public static final String PREF_IDM_ROUTER = "pref_idm_router";
