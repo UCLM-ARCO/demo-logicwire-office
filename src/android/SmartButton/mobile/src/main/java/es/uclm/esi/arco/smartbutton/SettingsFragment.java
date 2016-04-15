@@ -4,10 +4,13 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
+
+import java.util.Objects;
 
 public class SettingsFragment extends PreferenceFragment {
 
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener
+    private Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener
             = new Preference.OnPreferenceChangeListener() {
 
         @Override
@@ -17,12 +20,38 @@ public class SettingsFragment extends PreferenceFragment {
             if (stringValue.isEmpty())
                 stringValue = "<not set>";
 
+            if (preference.getKey().equals(MainActivity.PREF_IDM_ADDRESS))
+                if (! validateIDMAddress((String) value)) {
+                    Toast.makeText(getActivity(), R.string.invalid_idm_address, Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
             preference.setSummary(stringValue);
             return true;
         }
     };
 
-    private static void bindPreferenceSummaryToValue(Preference preference) {
+    private static boolean validateIDMAddress(String value) {
+        if (value == null || value.isEmpty())
+            return true;
+
+        String[] fields = value.split(":");
+        if (fields.length != 2)
+            return false;
+
+        for (String s: fields) {
+            if (s.length() != 2)
+                return false;
+            try {
+                Byte.parseByte(s, 16);
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void bindPreferenceSummaryToValue(Preference preference) {
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 PreferenceManager
