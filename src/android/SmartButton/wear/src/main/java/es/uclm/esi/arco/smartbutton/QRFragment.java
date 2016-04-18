@@ -1,9 +1,11 @@
 package es.uclm.esi.arco.smartbutton;
 
 import android.app.Fragment;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,16 +21,35 @@ public class QRFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View retval = inflater.inflate(R.layout.rect_fragment_qr, container, false);
-        ImageView image = (ImageView) retval.findViewById(R.id.qr_image);
+        final ImageView image = (ImageView) retval.findViewById(R.id.qr_image);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
+        prefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                System.out.println("WEAR: pref changed: " + key);
+
+                if (! key.equals(MainActivity.PREF_IDM_ADDRESS))
+                    return;
+
+                String addr = prefs.getString(MainActivity.PREF_IDM_ADDRESS, "");
+                updateImageWithQR(image, addr);
+            }
+        });
+
+        String addr = prefs.getString(MainActivity.PREF_IDM_ADDRESS, "");
+        updateImageWithQR(image, addr);
+        return retval;
+    }
+
+    private void updateImageWithQR(ImageView image, String addr) {
         final int width = 100;
         final int height = 100;
 
         QRCodeWriter wr = new QRCodeWriter();
         try {
-            String addr = this.getArguments().getString(MainActivity.PREF_IDM_ADDRESS);
-            if (addr == null) {
-                System.out.println("WARNING: unknown address!");
+            if (addr.isEmpty()) {
+                System.out.println("WEAR: empty address!");
                 addr = "unknown";
             }
 
@@ -45,7 +66,7 @@ public class QRFragment extends Fragment {
         } catch (WriterException e) {
             e.printStackTrace();
         }
-
-        return retval;
     }
+
+
 }

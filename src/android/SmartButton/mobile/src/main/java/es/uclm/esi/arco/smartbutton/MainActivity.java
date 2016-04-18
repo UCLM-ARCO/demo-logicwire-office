@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public static final String PREF_IDM_ROUTER = "pref_idm_router";
     public static final String PREF_IDM_ADDRESS = "pref_idm_address";
 
-    private static GoogleApiClient _client;
+    private GoogleApiClient _client;
     private Ice.Communicator _ic;
     private PropertyServerPrx _ps;
 
@@ -195,10 +195,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     // FIXME: implement setJSON on PS and use it!
     private void setProperties() {
-        System.out.println("set properties");
+        System.out.println("Setting properties on PS...");
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         final String idm_addr = prefs.getString(PREF_IDM_ADDRESS, "");
+        if (idm_addr.isEmpty()) {
+            System.out.println(" - IDM Address not defined, nothing done.");
+            return;
+        }
 
         final ThingSlice.T t_name = new ThingSlice.T(TypeCode.stringT, stringToByteseq("SmartButton"));
         final ThingSlice.T t_icon = new ThingSlice.T(TypeCode.stringT, stringToByteseq("touch"));
