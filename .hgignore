@@ -26,3 +26,4 @@ gradlew
 gradlew.bat
 *.jar
 src/generated
+*.apk

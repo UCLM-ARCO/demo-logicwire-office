@@ -29,11 +29,14 @@ import java.util.concurrent.ExecutionException;
 import IDM.NeighborDiscovery.Callback_Listener_adv;
 import Ice.AsyncResult;
 import Ice.Current;
+import Ice.EncodingVersion;
+import Ice.EncodingVersionHolder;
 import Ice.Identity;
 import Ice.LocalException;
 import Ice.ObjectAdapter;
 import Ice.ObjectPrx;
 import Ice.SystemException;
+import Ice.Util;
 
 class CustomGridPageAdapter extends FragmentGridPagerAdapter {
 
@@ -321,6 +324,7 @@ public class MainActivity extends Activity implements
         }
 
         ObjectPrx prx = _router.ice_identity(_ic.stringToIdentity(addr));
+        prx = prx.ice_encodingVersion(Util.Encoding_1_0);
         _observer = DUO.IDM.IBool.WPrxHelper.uncheckedCast(prx);
     }
 
