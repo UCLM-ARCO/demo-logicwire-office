@@ -16,7 +16,7 @@ BUILD_DIR     = esp8266_build
 SOURCE        = node.ino
 SLICE         = iot.ice
 
-vpath %.ino node
+
 vpath %.ice ../../slice
 
 
