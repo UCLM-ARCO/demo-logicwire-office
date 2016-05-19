@@ -47,14 +47,15 @@ Ice_ObjectAdapter adapter;
 Ice_ObjectPrx sink;
 
 // actuators
+IoT_WiFiNodeAdmin node;
 IoT_IBoolI relay;
-IoT_Node node;
 
 const char* local_endp = "tcp -p 4455";
 uint16_t my_idm_address_items;
 IDM_Address my_idm_address;
 
 Ticker async;
+Ticker rebooter;
 bool send_advs_now = false;
 
 bool
@@ -263,7 +264,7 @@ DUO_IDM_Active_WI_setObserver(DUO_IDM_Active_WPtr self_, IDM_Address observer) {
 }
 
 void
-IoT_NodeI_setupWiFi(IoT_NodePtr self, Ice_String ssid, Ice_String key) {
+IoT_WiFiNodeAdminI_setupWiFi(IoT_WiFiNodeAdminPtr self, Ice_String ssid, Ice_String key) {
     trace();
 
     const char zero = 0;
@@ -278,7 +279,7 @@ IoT_NodeI_setupWiFi(IoT_NodePtr self, Ice_String ssid, Ice_String key) {
 }
 
 void
-IoT_NodeI_setIDMRouter(IoT_NodePtr self, Ice_String proxy) {
+IoT_NodeAdminI_setIDMRouter(IoT_NodeAdminPtr self, Ice_String proxy) {
     const char zero = 0;
     IceC_Storage_put(DBINDEX_ROUTER, proxy.value, proxy.size);
     IceC_Storage_put(DBINDEX_ROUTER + proxy.size, &zero, 1);
@@ -287,13 +288,13 @@ IoT_NodeI_setIDMRouter(IoT_NodePtr self, Ice_String proxy) {
 }
 
 void
-IoT_NodeI_restart(IoT_NodePtr self) {
+IoT_NodeAdminI_restart(IoT_NodeAdminPtr self) {
     Serial.println("Node: restarting...");
     async.once(1, []() { ESP.restart(); });
 }
 
 void
-IoT_NodeI_factoryReset(IoT_NodePtr self) {
+IoT_NodeAdminI_factoryReset(IoT_NodeAdminPtr self) {
     async.once(1, []() { factory_reset(); });
 }
 
@@ -358,7 +359,7 @@ setup() {
     addr_to_identity(my_idm_address_items, oid);
     Serial.printf("NODE addr: '%s'\n", oid);
 
-    IoT_Node_init(&node);
+    IoT_WiFiNodeAdmin_init(&node);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&node, oid);
 
     addr_to_identity(my_idm_address_items + 1, oid);
@@ -374,6 +375,11 @@ setup() {
 	    async.attach(180, []() {
 		    send_advs_now = true;
 		});
+	});
+
+    // reboot node 15 minutes
+    rebooter.once(900, []() {
+	    IoT_NodeAdminI_restart(NULL);
 	});
 }
 

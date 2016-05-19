@@ -87,7 +87,7 @@ class Client(Ice.Application):
 
     def get_config_proxy(self, args):
         proxy = self.get_proxy(args)
-        return IoT.NodePrx.uncheckedCast(proxy)
+        return IoT.WiFiNodeAdminPrx.uncheckedCast(proxy)
 
     def get_state_proxy(self, args):
         proxy = self.get_proxy(args)
