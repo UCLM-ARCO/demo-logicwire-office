@@ -45,7 +45,7 @@ ota-upload:
 	@if [ -z "$$NODE_IP" ]; then echo -e "\nERROR: NODE_IP is not defined!\n"; exit 1; fi
 	python $(ESPTOOL_OTA) \
 	    -i $(NODE_IP) -p $(OTA_PORT) \
-	    -f $(BUILD_DIR)/${SOURCE:%.ino=%.cpp.bin}
+	    -f $(BUILD_DIR)/$(SOURCE).bin
 
 arduino-set-prefs:
 	-arduino --get-pref build.path \

@@ -308,6 +308,8 @@ setup() {
     pinMode(PIN_RELAY, OUTPUT);
     pinMode(PIN_LED, OUTPUT);
     pinMode(PIN_BUTTON, INPUT);
+    digitalWrite(PIN_RELAY, HIGH);
+    digitalWrite(PIN_LED, HIGH);
 
     // connect to Wireless network
     setup_wireless();
