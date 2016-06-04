@@ -48,7 +48,7 @@ ota-upload:
 	    -f $(BUILD_DIR)/$(SOURCE).bin
 
 arduino-set-prefs:
-	-arduino --get-pref build.path \
+	-arduino --get-pref editor.external \
 		--board $(BOARD) \
 	 	--pref custom_FlashSize=generic_1M64 \
 		--save-prefs
