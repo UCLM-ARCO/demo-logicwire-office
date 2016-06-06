@@ -1,4 +1,5 @@
 EESchema Schematic File Version 2
+LIBS:light-node-rescue
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -10,7 +11,6 @@ LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
-LIBS:special
 LIBS:microcontrollers
 LIBS:dsp
 LIBS:microchip
@@ -32,7 +32,7 @@ LIBS:valves
 LIBS:relay
 LIBS:esp866_esp-12
 LIBS:light-node-cache
-EELAYER 27 0
+EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -58,7 +58,7 @@ F 3 "~" H 2300 2800 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L TRANSFO T1
+L TRANSFO-RESCUE-light-node T1
 U 1 1 569CE00E
 P 1900 1650
 F 0 "T1" H 1900 1900 70  0000 C CNN
@@ -80,7 +80,7 @@ F 3 "" H 850 1650 60  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L R R2
+L R-RESCUE-light-node R2
 U 1 1 569CE394
 P 4050 3000
 F 0 "R2" V 4130 3000 40  0000 C CNN
@@ -91,7 +91,7 @@ F 3 "~" H 4050 3000 30  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L R R3
+L R-RESCUE-light-node R3
 U 1 1 569CE3A3
 P 4050 3150
 F 0 "R3" V 4130 3150 40  0000 C CNN
@@ -102,7 +102,7 @@ F 3 "~" H 4050 3150 30  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L R R4
+L R-RESCUE-light-node R4
 U 1 1 569CE3B2
 P 4050 3300
 F 0 "R4" V 4130 3300 40  0000 C CNN
@@ -113,7 +113,7 @@ F 3 "~" H 4050 3300 30  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L R R5
+L R-RESCUE-light-node R5
 U 1 1 569CE3C1
 P 3650 2400
 F 0 "R5" V 3730 2400 40  0000 C CNN
@@ -124,7 +124,7 @@ F 3 "~" H 3650 2400 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R6
+L R-RESCUE-light-node R6
 U 1 1 569CE3D0
 P 3650 3650
 F 0 "R6" V 3730 3650 40  0000 C CNN
@@ -135,7 +135,7 @@ F 3 "~" H 3650 3650 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R7
+L R-RESCUE-light-node R7
 U 1 1 569CE3DF
 P 1300 2800
 F 0 "R7" V 1380 2800 40  0000 C CNN
@@ -157,7 +157,7 @@ F 3 "~" H 4050 2000 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R1
+L R-RESCUE-light-node R1
 U 1 1 569CE3FD
 P 1300 2600
 F 0 "R1" V 1380 2600 40  0000 C CNN
@@ -190,7 +190,7 @@ F 3 "~" H 4050 2800 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED D1
+L LED-RESCUE-light-node D1
 U 1 1 569CE42A
 P 4000 4000
 F 0 "D1" H 4000 4100 50  0000 C CNN
