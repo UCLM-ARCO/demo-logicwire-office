@@ -15,12 +15,6 @@
 #include "iot.h"
 
 #define PIN_BUTTON      0
-
-// Settings for ARCO Muffin
-// #define PIN_LED         4
-// #define PIN_RELAY       5
-
-// Settings for ITEAD Sonoff
 #define PIN_LED         13
 #define PIN_RELAY       12
 
@@ -32,6 +26,8 @@
 #define DBINDEX_WPAKEY  DBINDEX_SSID + MAX_SSID_SIZE
 #define DBINDEX_ROUTER  DBINDEX_WPAKEY + MAX_WPAKEY_SIZE
 #define DBINDEX_RELAY   DBINDEX_ROUTER + MAX_PROXY_SIZE
+#define DBINDEX_ADDR    DBINDEX_RELAY + 4
+#define DBINDEX_STATE   DBINDEX_ADDR + 4
 
 typedef struct {
     Ice_Object base;
@@ -51,7 +47,7 @@ IoT_WiFiNodeAdmin node;
 IoT_IBoolI relay;
 
 const char* local_endp = "tcp -p 4455";
-uint16_t my_idm_address_items;
+byte my_idm_address_items[2];
 IDM_Address my_idm_address;
 
 Ticker async;
@@ -63,33 +59,70 @@ is_null_proxy(Ice_ObjectPrxPtr prx) {
     return ((ObjectPtr)prx)->tag != TAG_OK;
 }
 
+String
+get_local_ip() {
+    if (WiFi.getMode() == WIFI_AP)
+	return WiFi.softAPIP().toString();
+    else
+	return WiFi.localIP().toString();
+}
+
+String
+get_idm_address() {
+    char addr[] = {0, 0, 0, 0, 0};
+    IceC_Storage_get(DBINDEX_ADDR, addr, 4);
+
+    if (addr[0] == 0)
+	return IDM_ADDR;
+    return addr;
+}
+
+String
+get_router_idm_address() {
+    {
+	char addr[] = {0, 0, 0, 0, 0};
+	IceC_Storage_get(DBINDEX_ROUTER, addr, 4);
+	if (addr[0] != 0)
+	    return addr;
+    }
+
+    // defaults to xx:01
+    String addr = get_idm_address();
+    addr.setCharAt(addr.length() - 1, '1');
+    addr.setCharAt(addr.length() - 2, '0');
+    return addr;
+}
+
 void
 create_router_proxy() {
     // get proxy from local storage
     char strprx[MAX_PROXY_SIZE];
     IceC_Storage_get(DBINDEX_ROUTER, strprx, MAX_PROXY_SIZE);
 
-    // if not available, set proxy as null proxy
+    // if not available, create a default router for current network
     if (strprx[0] == 0) {
-	((ObjectPtr)&sink)->tag = NULL;
-	return;
+	String router_ip = get_local_ip();
+	router_ip = router_ip.substring(0, router_ip.lastIndexOf('.')) + ".2";
+
+	String router_prx = get_router_idm_address();
+	router_prx = router_prx + " -o:tcp -h " + router_ip + " -p 6140";
+
+	strcpy(strprx, router_prx.c_str());
     }
 
-    // otherwise, create proxy
     Ice_Communicator_stringToProxy(&ic, strprx, &sink);
     Serial.printf("IDM: using router '%s'\n", strprx);
 }
 
 void
-addr_to_identity(uint16_t addr, char* dst) {
-    byte* src = (byte*)&addr;
+bytes_to_hex(char* dst, const byte* src, const size_t size) {
     const char* hex = "0123456789ABCDEF";
 
     // platform is litle-endian
-    byte i;
-    for (i=0; i<2; i++) {
-	dst[2*i] = hex[(*(src+1-i) >> 4) & 0xF];
-	dst[2*i+1] = hex[*(src+1-i) & 0xF];
+    size_t i;
+    for (i=0; i<size; i++) {
+	dst[2*i] = hex[(*(src+i) >> 4) & 0xF];
+	dst[2*i+1] = hex[*(src+i) & 0xF];
     }
     dst[2*i] = 0;
 }
@@ -173,16 +206,17 @@ setup_wireless() {
 
     // if not available, config as AP, using IDM addr for SSID
     else {
-	strcpy(ssid, "NODE_" IDM_ADDR);
+	String addr = get_idm_address();
+	strcpy(ssid, ("NODE_" +  addr).c_str());
 	Serial.printf("WiFi: setting up AP as '%s'\n", ssid);
 
 	WiFi.mode(WIFI_AP);
 	WiFi.enableSTA(false);
 	WiFi.softAP(ssid);
-
-	Serial.print("WiFi: ready, IP address: ");
-	Serial.println(WiFi.softAPIP());
     }
+
+    Serial.printf("WiFi: ready, IP address: ");
+    Serial.println(get_local_ip());
 }
 
 void
@@ -190,13 +224,11 @@ announce_idm_objects() {
     if (is_null_proxy(&sink))
 	return;
 
-    // get IDM router identity from storage
-    char oid[5];
-    IceC_Storage_get(DBINDEX_ROUTER, oid, 4);
-    oid[4] = 0;
+    // get IDM router identity from somewhere
+    String oid = get_router_idm_address();
 
     // recreate router's proxy
-    Ice_ObjectPrx_ice_identity(&sink, oid);
+    Ice_ObjectPrx_ice_identity(&sink, oid.c_str());
 
     String local_addr;
     if (WiFi.getMode() == WIFI_AP)
@@ -207,15 +239,23 @@ announce_idm_objects() {
     Ice_String ice_strprx;
     String strprx;
 
-#define ADV(oid)							\
-    strprx = String(oid) + " -o:" + local_endp + " -h " + local_addr;	\
+#define ADV(OID)							\
+    strprx = String(OID) + " -o:" + local_endp + " -h " + local_addr;	\
     Ice_String_init(ice_strprx, strprx.c_str());			\
     IDM_NeighborDiscovery_Listener_adv(&sink, ice_strprx);
 
-    addr_to_identity(my_idm_address_items, oid);
-    ADV(oid);
-    addr_to_identity(my_idm_address_items + 1, oid);
-    ADV(oid);
+    char srv_oid[5];
+    byte idm_addr[2] = {
+	my_idm_address.items[0],
+	my_idm_address.items[1],
+    };
+
+    bytes_to_hex(srv_oid, idm_addr, 2);
+    ADV(srv_oid);
+
+    idm_addr[1]++;
+    bytes_to_hex(srv_oid, idm_addr, 2);
+    ADV(srv_oid);
 
     Serial.println("IDM: advertisements sent");
 }
@@ -236,6 +276,7 @@ DUO_IDM_IBool_WI_set(DUO_IDM_IBool_WPtr self, Ice_Bool v, IDM_Address source) {
     Serial.printf("DUO: set state to %s\n", v ? "True" : "False");
     digitalWrite(PIN_RELAY, v ? HIGH : LOW);
     digitalWrite(PIN_LED, v ? HIGH : LOW);
+    IceC_Storage_put(DBINDEX_STATE, (char*)&v, 1);
 
     if (((IoT_IBoolIPtr)self)->observer_id[0] == 0)
  	return;
@@ -251,15 +292,15 @@ DUO_IDM_IBool_WI_set(DUO_IDM_IBool_WPtr self, Ice_Bool v, IDM_Address source) {
 
 void
 DUO_IDM_Active_WI_setObserver(DUO_IDM_Active_WPtr self_, IDM_Address observer) {
+    // NOTE: method signature must be equal to its declaration
     IoT_IBoolIPtr self = (IoT_IBoolIPtr)self_;
-    uint16_t ob_addr = (observer.items[0] << 8) + observer.items[1];
 
-    if (ob_addr == 0)
+    if (observer.items[0] == 0 && observer.items[1] == 0)
 	self->observer_id[0] = 0;
     else
-	addr_to_identity(ob_addr, self->observer_id);
+	bytes_to_hex(self->observer_id, observer.items, 2);
 
-    IceC_Storage_put(self->observer_dbindex, self->observer_id, 5);
+    IceC_Storage_put(self->observer_dbindex, self->observer_id, 4);
     Serial.printf("DUO: set observer to '%s'\n", self->observer_id);
 }
 
@@ -299,6 +340,16 @@ IoT_NodeAdminI_factoryReset(IoT_NodeAdminPtr self) {
 }
 
 void
+IoT_NodeAdminI_setIDMAddress(IoT_NodeAdminPtr self, Ice_String address) {
+    char addr[] = {0, 0, 0, 0, 0};
+    memcpy(addr, address.value, 4);
+    Serial.printf("Node: setting IDM addr to '%s', then restarting...", addr);
+
+    IceC_Storage_put(DBINDEX_ADDR, address.value, address.size);
+    async.once(1, []() { ESP.restart(); });
+}
+
+void
 setup() {
     Serial.begin(115200);
     Serial.printf("\n\nSYSTEM: free flash space: %d\n", ESP.getFreeSketchSpace());
@@ -308,8 +359,14 @@ setup() {
     pinMode(PIN_RELAY, OUTPUT);
     pinMode(PIN_LED, OUTPUT);
     pinMode(PIN_BUTTON, INPUT);
-    digitalWrite(PIN_RELAY, HIGH);
-    digitalWrite(PIN_LED, HIGH);
+
+    // get last state from EEPROM and set it
+    {
+	char state = 0;
+	IceC_Storage_get(DBINDEX_STATE, &state, 1);
+	digitalWrite(PIN_RELAY, state ? HIGH : LOW);
+	digitalWrite(PIN_LED, state ? HIGH : LOW);
+    }
 
     // connect to Wireless network
     setup_wireless();
@@ -339,10 +396,11 @@ setup() {
     ArduinoOTA.begin();
 
     // setup IDM address, used as 'oid' on invocations
-    String addr = IDM_ADDR;
-    my_idm_address_items =
-     	(strtol(addr.substring(0, 2).c_str(), NULL, 16) << 8) +
-	strtol(addr.substring(2, 4).c_str(), NULL, 16);
+    String addr = get_idm_address();
+    Serial.printf("IDM: admin address: '%s'\n", addr.c_str());
+
+    my_idm_address_items[0] = strtol(addr.substring(0, 2).c_str(), NULL, 16);
+    my_idm_address_items[1] = strtol(addr.substring(2, 4).c_str(), NULL, 16);
     my_idm_address.items = (Ice_Byte*)&my_idm_address_items;
     my_idm_address.size = 2;
 
@@ -357,18 +415,22 @@ setup() {
 
     // initialize and register servants
     char oid[5];
+    byte servant_idm_addr[2];
+    servant_idm_addr[0] = my_idm_address.items[0];
+    servant_idm_addr[1] = my_idm_address.items[1];
 
-    addr_to_identity(my_idm_address_items, oid);
-    Serial.printf("NODE addr: '%s'\n", oid);
-
+    // register admin object
+    bytes_to_hex(oid, servant_idm_addr, 2);
     IoT_WiFiNodeAdmin_init(&node);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&node, oid);
+    Serial.printf("NODE addr: '%s'\n", oid);
 
-    addr_to_identity(my_idm_address_items + 1, oid);
-    Serial.printf("RELAY addr: '%s'\n", oid);
-
+    // register relay object
+    servant_idm_addr[1]++;
+    bytes_to_hex(oid, servant_idm_addr, 2);
     IoT_IBoolI_init(&relay, DBINDEX_RELAY);
     Ice_ObjectAdapter_add(&adapter, (Ice_ObjectPtr)&relay, oid);
+    Serial.printf("RELAY addr: '%s'\n", oid);
 
     // create dummy proxy to router and announce objects
     create_router_proxy();
