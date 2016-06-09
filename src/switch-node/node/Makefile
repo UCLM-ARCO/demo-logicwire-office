@@ -29,7 +29,7 @@ change-node:
 	@if [ -z "$$ADDR" ]; then echo -e "\nERROR: ADDR is not defined!\n"; exit 1; fi
 	sed -i "s/\(IDM_ADDR *\)\(.*\)/\1\"$(ADDR)\"/g" config.h
 
-build: arduino-set-prefs
+build:
 	mkdir -p $(BUILD_DIR)
 	arduino -v \
 	    --pref build.path=$(BUILD_DIR) \
@@ -39,16 +39,19 @@ upload:
 	$(ESPTOOL) \
 	    -vv -cd ck -cb $(PROG_SPEED) \
 	    -cp $(PROG_PORT) \
-	    -ca 0x00000 -cf $(BUILD_DIR)/${SOURCE:%.ino=%.cpp.bin}
+	    -ca 0x00000 -cf $(BUILD_DIR)/$(SOURCE).bin
 
 ota-upload:
 	@if [ -z "$$NODE_IP" ]; then echo -e "\nERROR: NODE_IP is not defined!\n"; exit 1; fi
 	python $(ESPTOOL_OTA) \
 	    -i $(NODE_IP) -p $(OTA_PORT) \
-	    -f $(BUILD_DIR)/${SOURCE:%.ino=%.cpp.bin}
+	    -f $(BUILD_DIR)/$(SOURCE).bin
 
 arduino-set-prefs:
-	arduino --board $(BOARD) --pref custom_FlashSize=generic_1M64 --save-prefs
+	-arduino --get-pref editor.external \
+		--board $(BOARD) \
+	 	--pref custom_FlashSize=generic_1M64 \
+		--save-prefs
 
 tty:
 	@echo "Press Ctrl + 4 to exit"
