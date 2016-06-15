@@ -82,6 +82,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             bindPreferenceSummaryToValue(findPreference(MainActivity.PREF_IDM_ROUTER));
             bindPreferenceSummaryToValue(findPreference(MainActivity.PREF_PROPERTY_SERVER));
+            bindPreferenceSummaryToValue(findPreference(MainActivity.PREF_WIRING_SERVICE));
         }
 
         @Override

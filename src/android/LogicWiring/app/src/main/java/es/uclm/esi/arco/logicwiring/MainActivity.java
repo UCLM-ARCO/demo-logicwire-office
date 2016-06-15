@@ -122,11 +122,17 @@ class ThingObject {
     }
 
     private byte[] stringToIdmAddress(String addr) {
-        String[] fields = addr.split(":");
-        byte[] retval = new byte[fields.length];
+        addr = addr.trim().replace(":", "");
 
-        for (int i=0; i<fields.length; i++)
-            retval[i] = Byte.parseByte(fields[i], 16);
+        // http://stackoverflow.com/a/140861/870503
+        int len = addr.length();
+        byte[] retval = new byte[len / 2];
+
+        for (int i = 0; i < len; i += 2) {
+            retval[i / 2] = (byte) ((Character.digit(addr.charAt(i), 16) << 4)
+                    + Character.digit(addr.charAt(i+1), 16));
+        }
+
         return retval;
     }
 
@@ -273,6 +279,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String PREF_PROPERTY_SERVER = "pref_property_server";
     public static final String PREF_IDM_ROUTER = "pref_idm_router";
+    public static final String PREF_WIRING_SERVICE = "pref_wiring_service";
 
     enum Action {
         NONE,
@@ -383,7 +390,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void addThingFromAddr(String addr) throws JSONException {
         if (addr != null)
-            addr = addr.trim();
+            addr = addr.trim().replace(":", "");
 
         if (_ps == null) {
             Toast.makeText(this, getString(R.string.ps_unreachable), Toast.LENGTH_LONG).show();
@@ -566,6 +573,7 @@ public class MainActivity extends AppCompatActivity {
                     .edit()
                     .putString(PREF_IDM_ROUTER, jObject.getString("IDMRouter"))
                     .putString(PREF_PROPERTY_SERVER, jObject.getString("PropertyServer"))
+                    .putString(PREF_WIRING_SERVICE, jObject.getString("WiringService"))
                     .apply();
 
             // restart activity

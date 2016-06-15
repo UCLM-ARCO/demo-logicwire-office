@@ -12,4 +12,9 @@
         android:title="@string/pref_ps_proxy"
         android:defaultValue="" />
 
+    <EditTextPreference
+        android:key="pref_wiring_service"
+        android:title="@string/prefs_dws_proxy"
+        android:defaultValue="" />
+
 </PreferenceScreen>
