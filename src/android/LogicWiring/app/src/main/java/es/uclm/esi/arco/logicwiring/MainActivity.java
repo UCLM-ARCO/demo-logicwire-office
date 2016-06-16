@@ -34,16 +34,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import DUO.IDM.WiringServicePrx;
+import DUO.IDM.WiringServicePrxHelper;
 import Ice.ObjectPrx;
-import Ice.Util;
 import PropertyService.PropertyException;
 import PropertyService.PropertyServerPrx;
 import PropertyService.PropertyServerPrxHelper;
-import ThingSlice.TypeCode;
-
-import static java.lang.Math.min;
 
 class ThingObject {
     public enum Type {
@@ -55,31 +54,29 @@ class ThingObject {
     public String addr;
     public String name;
     public Integer icon;
-    public ThingObject consumer;
+    public List<String> consumers;
 
-    private ObjectPrx _router;
-    private PropertyServerPrx _ps;
+    private WiringServicePrx _wiringService;
 
-    public ThingObject(String idm_addr, Type type, JSONObject props, ObjectPrx router, PropertyServerPrx ps)
+    public ThingObject(String idm_addr, Type type, JSONObject props, WiringServicePrx dws /*, ObjectPrx router, PropertyServerPrx ps*/)
             throws JSONException {
 
         this.type = type;
         this.addr = idm_addr;
-        this.consumer = null;
-        this._router = router;
-        this._ps = ps;
+        consumers = new ArrayList<>();
+        this._wiringService = dws;
 
-        // set icon
+        // set icon (names from Font Awesome)
         HashMap<String, Integer> icons = new HashMap<>();
-        icons.put("touch", R.drawable.ic_touch_app_black_48dp_blue);
-        icons.put("bulb", R.drawable.ic_wb_incandescent_black_48dp_orange);
-        icons.put("radio", R.drawable.ic_radio_button_checked_black_24dp_green);
+        icons.put("hand-pointer-o", R.drawable.ic_touch_app_black_48dp_blue);
+        icons.put("lightbulb-o", R.drawable.ic_wb_incandescent_black_48dp_orange);
+        icons.put("dot-circle-o", R.drawable.ic_radio_button_checked_black_24dp_green);
 
-        String icon_name = "touch";
+        String icon_name = "hand-pointer-o";
         if (props.has("icon"))
             icon_name = props.getString("icon");
         else if (this.type == Type.RECEIVER)
-            icon_name = "bulb";
+            icon_name = "lightbulb-o";
 
         this.icon = icons.get(icon_name);
         if (this.icon == null)
@@ -91,74 +88,42 @@ class ThingObject {
             this.name = props.getString("name");
     }
 
-    public void setConsumer(ThingObject consumer) {
-        if (consumer != null) {
-            setupLink(this.addr, consumer.addr);
-
-            ThingSlice.T v = new ThingSlice.T(TypeCode.stringT, stringToByteseq(consumer.addr));
-            _ps.begin_set(this.addr + "| observer", v);
-        }
-        else if (this.consumer != null) {
-            setupLink(this.addr, "00:00");
-
-            _ps.begin_remove(this.addr + "| observer");
-        }
-
-        this.consumer = consumer;
+    public void addConsumer(ThingObject consumer) {
+        _wiringService.begin_addObserver(addr, consumer.addr);
+        consumers.add(consumer.addr);
     }
 
-    private void setupLink(String producer, String consumer) {
-        System.out.println("call " + producer + ".setObserver(" + consumer + ")");
-
-        // get router's proxy with consumer.addr
-        Ice.Communicator ic = _router.ice_getCommunicator();
-        Ice.Identity dst_id = ic.stringToIdentity(producer.replace(":", ""));
-        ObjectPrx prx = _router.ice_identity(dst_id).ice_encodingVersion(Util.Encoding_1_0);
-        DUO.IDM.Active.WPrx dst = DUO.IDM.Active.WPrxHelper.uncheckedCast(prx);
-        System.out.println("Using proxy: '" + prx.toString() + "'");
-
-        // call to setupLink with this.addr
-        dst.begin_setObserver(stringToIdmAddress(consumer));
-    }
-
-    private byte[] stringToIdmAddress(String addr) {
-        addr = addr.trim().replace(":", "");
-
-        // http://stackoverflow.com/a/140861/870503
-        int len = addr.length();
-        byte[] retval = new byte[len / 2];
-
-        for (int i = 0; i < len; i += 2) {
-            retval[i / 2] = (byte) ((Character.digit(addr.charAt(i), 16) << 4)
-                    + Character.digit(addr.charAt(i+1), 16));
-        }
-
-        return retval;
-    }
-
-    private byte[] stringToByteseq(String s) {
-        byte[] retval = new byte[s.length() + 1];
-        retval[0] = (byte) min(255, s.length());
-        System.arraycopy(s.getBytes(), 0, retval, 1, s.length());
-        return retval;
+    public void removeConsumer(ThingObject consumer) {
+        _wiringService.begin_removeObserver(addr, consumer.addr);
+        consumers.remove(consumer.addr);
     }
 }
 
 class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupMenu.OnMenuItemClickListener {
 
-    private ThingObject _thingObject;
-    private View _view;
     private MainActivity _activity;
+    private ViewGroup _parent;
+    private ThingObject _thingObject;
+    private boolean _isClone;
+
+    private ThingObject _consumer;
+    private View _view;
 
     public ThingView(MainActivity activity, ViewGroup parent, ThingObject thingObject) {
-        _thingObject = thingObject;
+        this(activity, parent, thingObject, false);
+    }
+
+    public ThingView(MainActivity activity, ViewGroup parent, ThingObject thingObject, boolean isClone) {
         _activity = activity;
+        _parent = parent;
+        _thingObject = thingObject;
+        _isClone = isClone;
 
         // load card from XML layout
         LayoutInflater vi;
         vi = LayoutInflater.from(activity);
         _view = vi.inflate(R.layout.linked_thing_item, null);
-        parent.addView(_view);
+        _parent.addView(_view);
 
         updateContent();
     }
@@ -169,27 +134,36 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
         tv.setText(_thingObject.name);
         tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, _thingObject.icon, 0, 0);
 
+        // change overall color of clones
+        if (_isClone) {
+            int color = _view.getResources().getColor(R.color.thing_linked_clone_background);
+            View v = _view.findViewById(R.id.wholeThingHolder);
+            v.setBackgroundColor(color);
+        }
+
         // append linked view (if any)
-        if (_thingObject.consumer != null) {
+        View holder = _view.findViewById(R.id.LinkedThingHolder);
+        if (_consumer != null) {
             GridLayout.LayoutParams lp = (GridLayout.LayoutParams) _view.getLayoutParams();
             lp.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 2);
             _view.setLayoutParams(lp);
 
-            View addon = _view.findViewById(R.id.LinkedThingHolder);
-            addon.setVisibility(View.VISIBLE);
+            holder.setVisibility(View.VISIBLE);
 
             TextView dst_tv = (TextView) _view.findViewById(R.id.DstThingText);
-            dst_tv.setText(_thingObject.consumer.name);
-            dst_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, _thingObject.consumer.icon, 0, 0);
+            dst_tv.setText(_consumer.name);
+            dst_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, _consumer.icon, 0, 0);
         }
         else {
-            View addon = _view.findViewById(R.id.LinkedThingHolder);
-            addon.setVisibility(View.GONE);
+            holder.setVisibility(View.GONE);
         }
 
         // connect callbacks
-        tv.setOnLongClickListener(this);
-        tv.setOnDragListener(this);
+        if (_isClone || _thingObject.type == ThingObject.Type.RECEIVER)
+            tv.setOnLongClickListener(this);
+
+        if (! _isClone)
+            tv.setOnDragListener(this);
     }
 
     @Override
@@ -218,14 +192,15 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        if (_thingObject.consumer == null)
+        if (! _isClone || _consumer == null)
             return true;
 
-        Toast.makeText(_view.getContext(), "Removing observer of " + _thingObject.name,
-                Toast.LENGTH_LONG).show();
+        Toast.makeText(_view.getContext(), "Removing " + _consumer.name +
+                " as observer of " + _thingObject.name,
+                Toast.LENGTH_SHORT).show();
 
-        _thingObject.setConsumer(null);
-        updateContent();
+        setConsumer(null, false);
+        _parent.removeView(_view);
         return true;
     }
 
@@ -253,12 +228,8 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
                     return false;
                 }
 
-                // set dst as consumer for src and update views
-                _thingObject.setConsumer(src);
-                Toast.makeText(v.getContext(), "Setting " + src.name + " as observer of " + _thingObject.name,
-                        Toast.LENGTH_LONG).show();
-                updateContent();
-
+                // set dst as consumer of src and update views
+                createLinkedClone(src, false);
                 return true;
             }
 
@@ -270,8 +241,43 @@ class ThingView implements View.OnLongClickListener, View.OnDragListener, PopupM
         return false;
     }
 
+    public void createLinkedClone(ThingObject consumer, boolean onlyLocal) {
+        if (_thingObject.consumers.contains(consumer.addr)) {
+            if (! onlyLocal)
+                Toast.makeText(_activity, R.string.already_added_consumer,
+                        Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (! onlyLocal)
+            Toast.makeText(_activity, "Setting " + consumer.name + " as observer of " + _thingObject.name,
+                    Toast.LENGTH_SHORT).show();
+        ThingView v = new ThingView(_activity, _parent, _thingObject, true);
+        v.setConsumer(consumer, onlyLocal);
+    }
+
     public ThingObject getThingObject() {
         return _thingObject;
+    }
+
+    public void setConsumer(ThingObject consumer, boolean onlyLocal) {
+        // perform remote invocations (of course, if not only local)
+        if (consumer != null) {
+            if (onlyLocal)
+                _thingObject.consumers.add(consumer.addr);
+            else
+                _thingObject.addConsumer(consumer);
+        }
+        else if (_consumer != null) {
+            if (onlyLocal)
+                _thingObject.consumers.remove(_consumer.addr);
+            else
+                _thingObject.removeConsumer(_consumer);
+        }
+
+        // update local view
+        _consumer = consumer;
+        updateContent();
     }
 }
 
@@ -290,8 +296,8 @@ public class MainActivity extends AppCompatActivity {
     private Action _current_action = Action.NONE;
     private HashMap<String, ThingView> _thingViews;
     private Ice.Communicator _ic;
-    private ObjectPrx _router;
     private PropertyServerPrx _ps;
+    private WiringServicePrx _dws;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -309,6 +315,13 @@ public class MainActivity extends AppCompatActivity {
 
             createCommunicator();
             createProxies();
+
+            // DEBUG
+            try {
+                addThingFromAddr("7009");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -466,25 +479,28 @@ public class MainActivity extends AppCompatActivity {
 
         System.out.println("Adding " + addr + " as " + type.toString());
         GridLayout holder = (GridLayout) findViewById(holder_id);
-        ThingObject t = new ThingObject(addr, type, props, _router, _ps);
+        ThingObject t = new ThingObject(addr, type, props, _dws);
 
         ThingView v = new ThingView(this, holder, t);
         _thingViews.put(addr, v);
 
         // restore linked observer
-        if (props.has("observer")) {
-            String observer = props.getString("observer");
-            if (observer.equals(addr)) {
-                System.out.println("Invalid observer: same as object id");
-                return;
+        if (props.has("observers")) {
+            System.out.println("HAS OBSERVERS");
+            ArrayList<String> observers = JSONArrayToList(props.getJSONArray("observers"));
+
+            for (String observer : observers) {
+                if (observer.equals(addr)) {
+                    System.out.println("Invalid observer: same os object id");
+                    continue;
+                }
+
+                if (! _thingViews.containsKey(observer))
+                    addThingFromAddr(observer);
+
+                ThingObject consumer = _thingViews.get(observer).getThingObject();
+                v.createLinkedClone(consumer, true);
             }
-
-            if (! _thingViews.containsKey(observer))
-                addThingFromAddr(observer);
-
-            ThingObject consumer = _thingViews.get(observer).getThingObject();
-            t.consumer = consumer;
-            v.updateContent();
         }
     }
 
@@ -607,17 +623,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void createProxies() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String idm_str_proxy = sharedPref.getString(PREF_IDM_ROUTER, "");
+        ObjectPrx prx;
+
+        String dws_str_proxy = sharedPref.getString(PREF_WIRING_SERVICE, "");
         try {
-            _router = _ic.stringToProxy(idm_str_proxy);
+            prx = _ic.stringToProxy(dws_str_proxy);
+            _dws = WiringServicePrxHelper.checkedCast(prx);
         } catch (Ice.Exception e) {
-            Toast.makeText(this, getString(R.string.ps_invalid_proxy) + ":" + idm_str_proxy,
+            Toast.makeText(this, getString(R.string.dws_invalid_proxy) + ":" + dws_str_proxy,
                     Toast.LENGTH_LONG).show();
         }
 
         String ps_str_proxy = sharedPref.getString(PREF_PROPERTY_SERVER, "");
-        ObjectPrx prx = _ic.stringToProxy(ps_str_proxy);
         try {
+            prx = _ic.stringToProxy(ps_str_proxy);
             _ps = PropertyServerPrxHelper.checkedCast(prx);
         } catch (Ice.Exception e) {
             Toast.makeText(this, getString(R.string.ps_unreachable), Toast.LENGTH_LONG).show();

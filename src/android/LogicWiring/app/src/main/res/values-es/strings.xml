@@ -1,10 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Logic Wiring</string>
-    <string name="action_view_settings">Configuración</string>
     <string name="lets_begin">Empecemos configurando el sitio</string>
     <string name="pref_idm_router">Proxy del router IDM</string>
     <string name="start">INICIO</string>
     <string name="welcome">¡Bienvenido!</string>
     <string name="scan_qr_prompt">Buscando un código QR...</string>
+    <string name="action_add">Añadir nuevo</string>
+    <string name="action_edit_settings">Editar configuración</string>
+    <string name="action_unlink">Desconectar</string>
+    <string name="already_added_consumer">¡Ese consumidor ya existe!</string>
+    <string name="dws_invalid_proxy">No pude acceder al servicio de cableado</string>
+    <string name="error_cant_connect">No puedo conectar con</string>
+    <string name="error_invalid_addr">Dirección IDM no válida</string>
+    <string name="error_invalid_contents">Código QR no válido</string>
+    <string name="error_invalid_retrieved_config">Configuración no válida: no está en formato JSON</string>
+    <string name="error_repeated_addr">Objeto ya añadido</string>
+    <string name="error_while_parsing_response">Error mientras se procesaba la respuesta del servidor</string>
+    <string name="error_with_properties">Hubo un error mientras se obtenían las propiedades!</string>
+    <string name="load_settings">Cargar Configuración</string>
+    <string name="pref_ps_proxy">Proxy del Servidor de Propiedades</string>
+    <string name="unable_to_get_properties">No pude obtener las propiedades de</string>
+    <string name="title_activity_settings">Configuración</string>
+    <string name="section_sender">Productores:</string>
+    <string name="section_receiver">Consumidores:</string>
+    <string name="ps_unreachable">No pude acceder al Servidor de Propiedades!</string>
+    <string name="ps_invalid_proxy">Proxy no válido</string>
+    <string name="prefs_dws_proxy">Proxy del Servicio de Cableado</string>
 </resources>
