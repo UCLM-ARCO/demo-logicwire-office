@@ -315,13 +315,6 @@ public class MainActivity extends AppCompatActivity {
 
             createCommunicator();
             createProxies();
-
-            // DEBUG
-            try {
-                addThingFromAddr("7009");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
     }
 
