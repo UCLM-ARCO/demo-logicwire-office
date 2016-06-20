@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="297mm"
+   height="210mm"
+   viewBox="0 0 1052.3622 744.09448"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="all-codes.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.1073862"
+     inkscape:cx="399.75728"
+     inkscape:cy="372.04724"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="1920"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Capa 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-308.26772)">
+    <image
+       sodipodi:absref="/home/oscar/repos/demo.logicwire-office/media/qr-codes/qr-1313.png"
+       xlink:href="qr-1313.png"
+       width="200"
+       height="200"
+       preserveAspectRatio="none"
+       id="image3377"
+       x="65.714294"
+       y="369.50507" />
+    <image
+       sodipodi:absref="/home/oscar/repos/demo.logicwire-office/media/qr-codes/qr-itsi-config-json.png"
+       xlink:href="qr-itsi-config-json.png"
+       width="200"
+       height="200"
+       preserveAspectRatio="none"
+       id="image3388"
+       x="419.28577"
+       y="369.50507" />
+    <image
+       sodipodi:absref="/home/oscar/repos/demo.logicwire-office/media/qr-codes/qr-logic-wiring-app.png"
+       xlink:href="qr-logic-wiring-app.png"
+       width="200"
+       height="200"
+       preserveAspectRatio="none"
+       id="image3399"
+       x="772.85718"
+       y="369.50507" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="104.13104"
+       y="588.73541"
+       id="text3402"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3404"
+         x="104.13104"
+         y="588.73541">Office Objects</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3406"
+       y="588.73541"
+       x="460.17627"
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="588.73541"
+         x="460.17627"
+         sodipodi:role="line"
+         id="tspan3414">Configuration</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="798.92224"
+       y="588.73541"
+       id="text3410"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3412"
+         x="798.92224"
+         y="588.73541">Logic Wiring App</tspan></text>
+  </g>
+</svg>
