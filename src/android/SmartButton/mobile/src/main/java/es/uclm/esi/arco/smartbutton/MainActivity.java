@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         System.out.println("Setting properties on PS...");
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        final String idm_addr = prefs.getString(PREF_IDM_ADDRESS, "");
+        final String idm_addr = prefs.getString(PREF_IDM_ADDRESS, "").replace(":", "").trim();
         if (idm_addr.isEmpty()) {
             System.out.println(" - IDM Address not defined, nothing done.");
             return;

@@ -303,10 +303,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-        Byte.parseByte("AA", 16);
-
-
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String idm_str_proxy = sharedPref.getString(PREF_IDM_ROUTER, "");
         _thingViews = new HashMap<>();
