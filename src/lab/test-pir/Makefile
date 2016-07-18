@@ -1,0 +1,49 @@
+# -*- mode: makefile-gmake; coding: utf-8 -*-
+
+SHELL        := /bin/bash
+BOARD         = esp8266com:esp8266:espino
+
+# serial upload
+ESPTOOL       = $$HOME/repos/esp8266/tools/esptool/esptool
+PROG_PORT    ?= /dev/ttyUSB0
+PROG_SPEED    = 921600
+
+# over the air upload
+ESPTOOL_OTA   = $$HOME/repos/esp8266/tools/espota.py
+OTA_PORT      = 8266
+
+BUILD_DIR     = esp8266_build
+SOURCE        = test-pir.ino
+
+
+all:
+	mkdir -p $(BUILD_DIR)
+	arduino -v \
+	    --pref build.path=$(BUILD_DIR) \
+	    --verify $(SOURCE)
+
+upload:
+	$(ESPTOOL) \
+	    -vv -cd ck -cb $(PROG_SPEED) \
+	    -cp $(PROG_PORT) \
+	    -ca 0x00000 -cf $(BUILD_DIR)/$(SOURCE).bin
+
+ota-upload:
+	@if [ -z "$$NODE_IP" ]; then echo -e "\nERROR: NODE_IP is not defined!\n"; exit 1; fi
+	python $(ESPTOOL_OTA) \
+	    -i $(NODE_IP) -p $(OTA_PORT) \
+	    -f $(BUILD_DIR)/$(SOURCE).bin
+
+arduino-set-prefs:
+	arduino --get-pref editor.external \
+                 --board $(BOARD) \
+		 --pref custom_FlashSize=generic_4M1M \
+		 --save-prefs
+
+tty:
+	@echo "Press Ctrl + 4 to exit"
+	microcom -p $(PROG_PORT) -f -s 115200
+
+PHONY: clean
+clean:
+	$(RM) -rv $(BUILD_DIR) *~

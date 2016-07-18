@@ -361,10 +361,10 @@ Text Label 1700 2250 0    60   ~ 0
 GND
 Text Label 1700 2400 0    60   ~ 0
 GND
-Text Label 1700 2550 0    60   ~ 0
-3.3Vcc
 Text Label 1700 2700 0    60   ~ 0
 3.3Vcc
 NoConn ~ 4700 2150
 NoConn ~ 4700 2250
+Text Label 1700 2550 0    60   ~ 0
+3.3Vcc
 $EndSCHEMATC
