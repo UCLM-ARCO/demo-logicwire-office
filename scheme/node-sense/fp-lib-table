@@ -1,3 +1,0 @@
-(fp_lib_table
-  (lib (name esp8266)(type KiCad)(uri /home/oscar/repos/demo.idm-sand/src/lib/esp8266.pretty)(options "")(descr ""))
-)
