@@ -5,7 +5,7 @@ This repository contains the firmware for a node with:
 * Reed sensor
 * PIR sensor
 
-The objects implements are Active.W and use IBool.W iface, from IDM.
+The internal objects implement Active.W and use IBool.W iface, from IDM.
 
 WARNING: this repository is linked on documentation. If you move it,
 please update the following doc:
