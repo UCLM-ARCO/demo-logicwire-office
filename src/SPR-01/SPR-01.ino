@@ -31,7 +31,6 @@
 #define DBINDEX_REED    DBINDEX_PIR + IDM_ADDR_SIZE
 #define DBINDEX_ADDR    DBINDEX_REED + 4
 
-// NOTE: this node's sensors (PIR and REED) has an inverted logic
 
 typedef struct {
     Ice_Object base;
@@ -63,21 +62,27 @@ bool send_advs_now = false;
 
 
 // REMOTE DEBUG ------------------------------------------------------------
-#define _SERIAL_TO_NET_ 1
+// #define _SERIAL_TO_NET_ 1
+// #define _SERIAL_DEBUG_ 1
 #ifdef  _SERIAL_TO_NET_
 
 WiFiClient rlog;
-#define _LOG_INIT() rlog.connect("192.168.4.2", 9000)
+#define _LOG_INIT() rlog.connect("192.168.100.25", 9000)
 #define _PRINT rlog.print
 #define _PRINTF rlog.printf
 #define _PRINTLN rlog.println
 
-#else
-
+#elif defined(_SERIAL_DEBUG_)
 #define _LOG_INIT() Serial.begin(115200)
 #define _PRINT Serial.print
 #define _PRINTF Serial.printf
 #define _PRINTLN Serial.println
+
+#else
+#define _LOG_INIT()
+#define _PRINT
+#define _PRINTF
+#define _PRINTLN
 
 #endif
 // End of REMOTE DEBUG ------------------------------------------------------------
@@ -163,17 +168,73 @@ factory_reset() {
 }
 
 void
-check_input(DUO_ActiveIPtr servant) {
-    // NOTE: inverted logic
-    bool new_state = ! digitalRead(servant->pin);
-    if (servant->state == new_state)
+check_reed() {
+    bool new_state = digitalRead(reed.pin);
+    if (reed.state == new_state)
 	return;
 
-    servant->state = new_state;
+    reed.state = new_state;
+    _PRINTF("SYSTEM: change on input of REED, state: %d\n", new_state);
 
-    if (servant->observer_id[0] != 0) {
-	Ice_ObjectPrx_ice_identity(&sink, servant->observer_id);
+    if (reed.observer_id[0] != 0) {
+	Ice_ObjectPrx_ice_identity(&sink, reed.observer_id);
 	DUO_IDM_IBool_W_set(&sink, new_state, my_idm_address);
+    }
+}
+
+#define T_HOLD  3000    // timeout for PIR to go to "no motion" state
+#define T_MIN   250     // minimum time for PIR to recognize a "motion" event
+unsigned long t_hold = 0;
+unsigned long t_min = 0;
+
+void
+check_pir() {
+    // NOTE: inverted logic for PIR
+    bool new_state = ! digitalRead(pir.pin);
+
+    // filter stage: let the 'motion' state be at least T_MIN time
+    if (new_state) {
+	if (t_min == 0) {
+	    t_min = millis() + T_MIN;
+	    return;
+	}
+
+	if (millis() < t_min)
+	    return;
+
+	if (pir.state)
+	    return;
+    }
+    else {
+	t_min = 0;
+	if (! pir.state)
+	    return;
+    }
+
+    // holding stage: do no sent "no motion" until a T_HOLD time elapsed
+    bool send_state = false;
+    if (new_state) {
+    	t_hold = millis() + T_HOLD;
+    	if (pir.state != new_state) {
+    	    pir.state = new_state;
+    	    send_state = true;
+    	}
+    }
+    else if (millis() > t_hold) {
+    	if (pir.state != new_state) {
+    	    pir.state = new_state;
+    	    send_state = true;
+    	}
+    }
+
+    if (send_state) {
+    	_PRINTF("SYSTEM: change on input of PIR, state: %d\n", new_state);
+    	digitalWrite(PIN_LED, new_state);
+
+    	if (pir.observer_id[0] != 0) {
+    	    Ice_ObjectPrx_ice_identity(&sink, pir.observer_id);
+    	    DUO_IDM_IBool_W_set(&sink, new_state, my_idm_address);
+    	}
     }
 }
 
@@ -298,9 +359,11 @@ DUO_ActiveI_init(DUO_ActiveIPtr self, uint16_t observer_dbindex, byte pin) {
     self->observer_dbindex = observer_dbindex;
     self->observer_id[4] = 0;
     self->pin = pin;
+    self->state = digitalRead(pin);
 
-    // NOTE: inverted logic
-    self->state = ! digitalRead(pin);
+    // NOTE: inverted logic for PIR
+    if (pin == PIN_PIR)
+	self->state = ! self->state;
 }
 
 void
@@ -367,7 +430,7 @@ void
 setup() {
     IceC_Storage_begin();
     pinMode(PIN_PIR, INPUT);
-    pinMode(PIN_REED, INPUT);
+    pinMode(PIN_REED, INPUT_PULLUP);
     pinMode(PIN_LED, OUTPUT);
 
     setup_wireless();
@@ -459,8 +522,6 @@ setup() {
 	});
 }
 
-unsigned long t1 = millis();
-
 void
 loop() {
     if (send_advs_now) {
@@ -468,14 +529,10 @@ loop() {
  	announce_idm_objects();
     }
 
-    if (millis() - t1 > 800) {
-	t1 = millis();
-	check_input(&pir);
-	digitalWrite(PIN_LED, pir.state);
-    }
-
     Ice_Communicator_loopIteration(&ic);
     ArduinoOTA.handle();
-    check_input(&reed);
+
+    check_reed();
+    check_pir();
     check_pgr_button();
 }

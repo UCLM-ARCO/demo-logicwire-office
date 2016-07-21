@@ -13,7 +13,7 @@ ESPTOOL_OTA   = $$HOME/repos/esp8266/tools/espota.py
 OTA_PORT      = 8266
 
 BUILD_DIR     = esp8266_build
-SOURCE        = node-sense.ino
+SOURCE        = SPR-01.ino
 SLICE         = iot.ice
 
 vpath %.ice ../slice
