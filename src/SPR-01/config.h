@@ -1,9 +1,3 @@
 // -*- mode: c++; coding: utf-8 -*-
 
-//
-// NOTE: this is a template. Please, copy this file to 'config.h' and
-// change the settings to suit your needs. The file 'config.h' will
-// not be tracked.
-//
-
-#define IDM_ADDR "1234"
+#define IDM_ADDR "5555"

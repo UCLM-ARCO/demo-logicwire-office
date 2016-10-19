@@ -20,7 +20,7 @@
 #define IDM_ADDR_SIZE   5
 
 #define PIN_PGR_BUTTON  0
-#define PIN_PIR         4
+#define PIN_PIR         12
 #define PIN_REED        5
 #define PIN_LED         13
 

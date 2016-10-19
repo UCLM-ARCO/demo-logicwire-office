@@ -4,7 +4,7 @@
 #include <ArduinoOTA.h>
 
 #define PIN_LED         13
-#define PIN_PIR         4
+#define PIN_PIR         12
 
 
 void

@@ -2,8 +2,8 @@ This repository contains the firmware for a node with:
 
 * Sonoff
 * Sonoff IO Shield
-* Reed sensor
-* PIR sensor
+* Reed sensor (connected to GPIO5 and GND)
+* PIR sensor (connected to GPIO12)
 
 The internal objects implement Active.W and use IBool.W iface, from IDM.
 
