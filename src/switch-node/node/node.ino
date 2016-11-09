@@ -52,7 +52,7 @@ IoT_WiFiNodeAdmin node;
 
 const char* local_endp = "tcp -p 4455";
 byte my_idm_address_items[2];
-IDM_Address my_idm_address;
+DUO_IDM_Address my_idm_address;
 
 Ticker async;
 Ticker rebooter;
@@ -64,7 +64,7 @@ bool send_advs_now = false;
 #ifdef  _SERIAL_TO_NET_
 
 WiFiClient rlog;
-#define _LOG_INIT() rlog.connect("192.168.100.1", 9000)
+#define _LOG_INIT() rlog.connect("192.168.1.131", 9000)
 #define _PRINT rlog.print
 #define _PRINTF rlog.printf
 #define _PRINTLN rlog.println
@@ -193,30 +193,27 @@ send_button_changes() {
 	bool s1 = digitalRead(button1.pin);
 	if (s1 != button1.state) {
 	    delay(50);  // fix bouncing
-	    if (digitalRead(button1.pin) != s1)
-		goto NEXT_BUTTON;
-
-	    button1.state = s1;
-	    _PRINTF("DUO: send state of B1 (%d) to '%s'\n",
-			  s1, button1.observer_id);
-	    Ice_ObjectPrx_ice_identity(&sink, button1.observer_id);
-	    DUO_IDM_IBool_W_set(&sink, s1, my_idm_address);
+	    if (digitalRead(button1.pin) == s1) {
+		button1.state = s1;
+		_PRINTF("DUO: send state of B1 (%d) to '%s'\n",
+			s1, button1.observer_id);
+		Ice_ObjectPrx_ice_identity(&sink, button1.observer_id);
+		DUO_IDM_IBool_W_set(&sink, s1, my_idm_address);
+	    }
 	}
     }
 
- NEXT_BUTTON:
     if (button2.observer_id[0] != 0) {
 	bool s2 = digitalRead(button2.pin);
 	if (s2 != button2.state) {
 	    delay(50);  // fix bouncing
-	    if (digitalRead(button2.pin) != s2)
-		return;
-
-	    button2.state = s2;
-	    _PRINTF("DUO: send state of B2 (%d) to '%s'\n",
-			  s2, button2.observer_id);
-	    Ice_ObjectPrx_ice_identity(&sink, button2.observer_id);
-	    DUO_IDM_IBool_W_set(&sink, s2, my_idm_address);
+	    if (digitalRead(button2.pin) == s2) {
+		button2.state = s2;
+		_PRINTF("DUO: send state of B2 (%d) to '%s'\n",
+			s2, button2.observer_id);
+		Ice_ObjectPrx_ice_identity(&sink, button2.observer_id);
+		DUO_IDM_IBool_W_set(&sink, s2, my_idm_address);
+	    }
 	}
     }
 }
@@ -331,7 +328,7 @@ DUO_ActiveI_init(DUO_ActiveIPtr self, uint16_t observer_dbindex, byte pin) {
 }
 
 void
-DUO_IDM_Active_WI_setObserver(DUO_IDM_Active_WPtr self_, IDM_Address observer) {
+DUO_IDM_Active_WI_setObserver(DUO_IDM_Active_WPtr self_, DUO_IDM_Address observer) {
     // NOTE: method signature must be equal to its declaration
     DUO_ActiveIPtr self = (DUO_ActiveIPtr)self_;
 
@@ -481,6 +478,7 @@ setup() {
 
     // reboot node 15 minutes
     rebooter.once(900, []() {
+	    _PRINTF("NODE: Programmed restart...\n");
 	    IoT_NodeAdminI_restart(NULL);
 	});
 }

@@ -5,7 +5,7 @@ BOARD         = esp8266com:esp8266:generic
 
 # serial upload
 ESPTOOL       = $$HOME/repos/esp8266/tools/esptool/esptool
-PROG_PORT    ?= /dev/ttyUSB0
+PROG_PORT    ?= /dev/ttyUSB1
 PROG_SPEED    = 921600
 
 # over the air upload
